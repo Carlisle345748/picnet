@@ -10,7 +10,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from .models import *
+from .models import User, Photo
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -21,8 +21,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 def auth(func):
     def auth_user(*args, **kwargs):
-        if "user_id" not in args[0].session:
-            return Response({'code': 1003, 'msg': 'user not logged in'}, status=401)
+        # if "user_id" not in args[0].session:
+        #     return Response({'code': 1003, 'msg': 'user not logged in'}, status=401)
         return func(*args, **kwargs)
 
     return auth_user
@@ -33,43 +33,37 @@ def test_count(request: Request):
     return Response({
         "user": User.objects.count(),
         "photo": Photo.objects.count(),
-        "comment": Comment.objects.count(),
     })
 
 
 @api_view(['GET'])
 @auth
 def users(request: Request):
-    serializer = UserSerializer(User.objects.all(), many=True)
     data = map(lambda x: {
-        '_id': x['_id'],
-        'first_name': x['first_name'],
-        'last_name': x['last_name']
-    }, serializer.data)
+        '_id': str(x.id),
+        'first_name': x.first_name,
+        'last_name': x.last_name,
+    }, User.objects())
     return Response(data)
 
 
 @api_view(['GET'])
 @auth
 def find_user(request: Request, user_id):
-    user = User.objects.get(_id=ObjectId(user_id))
-    return Response(UserSerializer(user).data)
+    result = User.objects(id=ObjectId(user_id))
+    if result.count() == 0:
+        return Response({"code": 1001, "msg": "user not found"})
+    user = User.objects(id=ObjectId(user_id))[0].to_mongo()
+    user['_id'] = str(user["_id"])
+    return Response(user)
 
 
 @api_view(['GET'])
 @auth
 def photo_of_user(request: Request, user_id):
-    photos = User.objects.get(pk=ObjectId(user_id)).photo_set.all().values()
+    photos = Photo.objects(user_id=user_id)
     for p in photos:
-        p['_id'] = str(p['_id'])
-        p['user_id'] = str(p['user_id'])
-        p['url'] = f"media/{p['file_name']}"
-        for c in p['comments']:
-            u = User.objects.get(pk=c['user_id'])
-            del c['user_id']
-            c['_id'] = str(c['_id'])
-            c['user'] = {"_id": str(u._id), "first_name": u.first_name, "last_name": u.last_name}
-            c['date_time'] = timezone.make_aware(c['date_time'], timezone.timezone.utc)
+        print(p.user_id.to_mongo())
     return Response(photos)
 
 

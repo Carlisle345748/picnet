@@ -1,32 +1,31 @@
-from djongo import models
+from mongoengine import *
+from datetime import datetime
 
-# Create your models here.
-
-
-class User(models.Model):
-    _id = models.ObjectIdField()
-    first_name = models.CharField(max_length=256, blank=False)
-    last_name = models.CharField(max_length=256, blank=False)
-    location = models.CharField(max_length=256)
-    description = models.CharField(max_length=256)
-    occupation = models.CharField(max_length=256)
-    login_name = models.CharField(max_length=256, blank=False)
-    password = models.CharField(max_length=256, blank=False)
+connect('photo', username='root', password='123456', authentication_source='admin')
 
 
-class Comment(models.Model):
-    _id = models.ObjectIdField()
-    comment = models.CharField(max_length=256)
-    date_time = models.DateTimeField()
-    user_id = models.GenericObjectIdField()
+class User(Document):
+    first_name = StringField(required=True, max_length=50)
+    last_name = StringField(required=True, max_length=50)
+    location = StringField()
+    description = StringField()
+    occupation = StringField()
+    login_name = StringField(required=True)
+    password = StringField(required=True)
 
-    class Meta:
-        managed = False
+    meta = {'collection': 'backend_user'}
 
 
-class Photo(models.Model):
-    _id = models.ObjectIdField()
-    file_name = models.CharField(max_length=256)
-    date_time = models.DateTimeField(auto_now_add=True, blank=False)
-    comments = models.ArrayField(model_container=Comment)
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
+class Comment(EmbeddedDocument):
+    comment = StringField(required=True)
+    date_time = DateTimeField(required=True, default=datetime.utcnow)
+    user_id = ReferenceField(User, required=True)
+
+
+class Photo(Document):
+    file_name = StringField(required=True)
+    date_time = DateTimeField(required=True, default=datetime.utcnow)
+    comments = ListField(EmbeddedDocumentField(Comment))
+    user_id = ReferenceField(User, required=True)
+
+    meta = {'collection': 'backend_photo'}

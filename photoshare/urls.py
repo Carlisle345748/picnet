@@ -19,9 +19,13 @@ from django.views.generic import TemplateView
 from django.urls import include, path
 from django.conf.urls.static import static
 from django.conf import settings
+from graphene_django.views import GraphQLView
+
+from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", TemplateView.as_view(template_name="photo-share.html"), name="main"),
-    path("", include('backend.urls'))
+    path("", include('backend.urls')),
+    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

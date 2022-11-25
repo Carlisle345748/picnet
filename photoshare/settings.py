@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'backend',
     'corsheaders',
+    'graphene_django',
 ]
 
 MIDDLEWARE = [
@@ -60,6 +61,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000"
 ]
 
+GRAPHENE = {
+    'SCHEMA': 'backend.schema.schema',
+}
 
 ROOT_URLCONF = 'photoshare.urls'
 
