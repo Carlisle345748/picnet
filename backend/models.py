@@ -19,13 +19,13 @@ class User(Document):
 class Comment(EmbeddedDocument):
     comment = StringField(required=True)
     date_time = DateTimeField(required=True, default=datetime.utcnow)
-    user_id = ReferenceField(User, required=True)
+    user = ReferenceField(User, required=True)
 
 
 class Photo(Document):
     file_name = StringField(required=True)
     date_time = DateTimeField(required=True, default=datetime.utcnow)
     comments = ListField(EmbeddedDocumentField(Comment))
-    user_id = ReferenceField(User, required=True)
+    user = ReferenceField(User, required=True)
 
     meta = {'collection': 'backend_photo'}

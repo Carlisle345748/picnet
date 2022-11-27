@@ -70,7 +70,7 @@ ROOT_URLCONF = 'photoshare.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["template"],
+        'DIRS': ["template", "frontend/build"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,8 +139,7 @@ STATIC_URL = "static/"
 STATIC_ROOT = "static/"
 
 STATICFILES_DIRS = [
-    "/Users/carlisle/Library/Mobile Documents/com~apple~CloudDocs/CS_Learning/cs142/Project5/compiled",
-    "/Users/carlisle/Library/Mobile Documents/com~apple~CloudDocs/CS_Learning/cs142/Project5/images"
+    "frontend/build/static",
 ]
 
 # Default primary key field type

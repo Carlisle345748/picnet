@@ -77,26 +77,26 @@ def populate(apps, schema_editor):
     Photo(
         date_time=parse_time("2012-08-30 10:44:23"),
         file_name="ouster.jpg",
-        user_id=jo,
+        user=jo,
         comments=[Comment(date_time=parse_time("2012-09-02 14:01:00"),
                           comment="Learning new programming languages is hard... it's so easy to forget a </div>!",
-                          user_id=jo),
+                          user=jo),
                   Comment(date_time=parse_time("2013-09-06 14:02:00"),
                           comment="This is another comment, with a bit more text; " +
                                   "if the text gets long enough, does it wrap properly " +
                                   "from line to line?",
-                          user_id=jo),
+                          user=jo),
                   Comment(date_time=parse_time("2013-09-08 14:06:00"),
                           comment="If you see this text in <b>boldface</b> " +
                                   "then HTML escaping isn't working properly.",
-                          user_id=jo)
+                          user=jo)
                   ]
     ).save()
 
     Photo(
         date_time=parse_time("2009-09-13 20:00:00"),
         file_name="malcolm2.jpg",
-        user_id=im,
+        user=im,
         comments=[Comment(
             date_time=parse_time("2009-09-14 18:07:00"),
             comment="If there is one thing the history of evolution has" +
@@ -104,114 +104,114 @@ def populate(apps, schema_editor):
                     "free, it expands to new territories and crashes through " +
                     "barriers, painfully, maybe even dangerously, but, uh... well, " +
                     "there it is. Life finds a way.",
-            user_id=im),
+            user=im),
         ]
     ).save()
 
     Photo(
         date_time=parse_time("2009-09-13 20:05:03"),
         file_name="malcolm1.jpg",
-        user_id=im,
+        user=im,
         comments=[]
     ).save()
 
     Photo(
         date_time=parse_time("2013-11-18 18:02:00"),
         file_name="ripley1.jpg",
-        user_id=er,
+        user=er,
         comments=[]
     ).save()
 
     Photo(
         date_time=parse_time("2013-09-20 17:30:00"),
         file_name="ripley2.jpg",
-        user_id=er,
+        user=er,
         comments=[
             Comment(date_time=parse_time("2013-11-28 17:45:13"),
                     comment="Back from my trip. Did IQs just... drop sharply while I was away?",
-                    user_id=er)
+                    user=er)
         ]
     ).save()
 
     Photo(
         date_time=parse_time("2009-07-10 16:02:49"),
         file_name="kenobi1.jpg",
-        user_id=rk,
+        user=rk,
         comments=[]
     ).save()
 
     Photo(
         date_time=parse_time("2010-03-18 23:48:00"),
         file_name="kenobi2.jpg",
-        user_id=rk,
+        user=rk,
         comments=[
             Comment(date_time=parse_time("2013-11-02 14:07:00"),
                     comment="Hey Rey, great form. Love what " +
                             "you do with the scavenged tech, got any tips?",
-                    user_id=er),
+                    user=er),
             Comment(date_time=parse_time("2013-11-02 14:07:00"),
                     comment="Definitely! I love your work! I'm away on a trip at " +
                             "the moment, but let's meet up when I get back! :)",
-                    user_id=rk),
+                    user=rk),
         ]
     ).save()
 
     Photo(
         date_time=parse_time("2010-08-30 14:26:00"),
         file_name="kenobi3.jpg",
-        user_id=rk,
+        user=rk,
         comments=[
             Comment(date_time=parse_time("2010-09-06 13:59:33"),
                     comment="Made a new friend today! Well, they followed me home, anyway.",
-                    user_id=rk)
+                    user=rk)
         ]
     ).save()
 
     Photo(
         date_time=parse_time("2013-12-03 09:02:00"),
         file_name="took1.jpg",
-        user_id=pt,
+        user=pt,
         comments=[
             Comment(date_time=parse_time("2016-01-04 2:00:01"),
-                    comment="Which one are you?", user_id=al),
+                    comment="Which one are you?", user=al),
             Comment(date_time=parse_time("2016-01-04 2:04:01"),
-                    comment="The tall one", user_id=pt),
+                    comment="The tall one", user=pt),
         ]
     ).save()
 
     Photo(
         date_time=parse_time("2013-12-03 09:03:00"),
         file_name="took2.jpg",
-        user_id=rk,
+        user=rk,
         comments=[
             Comment(date_time=parse_time("2013-12-04 13:12:00"),
                     comment="What do you mean you haven't heard of second breakfast?",
-                    user_id=pt)
+                    user=pt)
         ]
     ).save()
 
     Photo(
         date_time=parse_time("2013-09-04 09:16:32"),
         file_name="ludgate1.jpg",
-        user_id=al,
+        user=al,
         comments=[
             Comment(date_time=parse_time("2013-09-04 10:14:32"),
                     comment="Beautiful yet cold and aloof. Loner. Does not obey, " +
                             "occasionally chooses to cooperate. ",
-                    user_id=al)
+                    user=al)
         ]
     ).save()
 
     Photo(
         date_time=parse_time("2008-10-16 17:12:28"),
         file_name="kenobi4.jpg",
-        user_id=rk,
+        user=rk,
         comments=[
             Comment(date_time=parse_time("2008-10-16 18:04:55"),
                     comment="Wouldn't get anywhere without this beauty! " +
                             "Completely built from scraps by hand, but she goes at top " +
                             "speeds that'll rival any First Order piece of junk.",
-                    user_id=rk),
+                    user=rk),
         ]
     ).save()
 
