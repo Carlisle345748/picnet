@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from time import time as timer
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -33,19 +32,10 @@ def auth(func):
     return auth_user
 
 
-def timing_middleware(next, root, info, **args):
-    start = timer()
-    return_value = next(root, info, **args)
-    duration = round((timer() - start) * 1000, 2)
-    parent_type_name = root._meta.name if root and hasattr(root, '_meta') and hasattr(root._meta, "name") else ''
-    print(f"{parent_type_name}.{info.field_name}: {duration} ms")
-    return return_value
-
-
 urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + [
     path("admin/", admin.site.urls),
     # path("graphql", csrf_exempt(GraphQLView.as_view(graphiql=True))),
-    path("graphql", auth(GraphQLView.as_view(graphiql=True, middleware=[timing_middleware]))),
+    path("graphql", auth(GraphQLView.as_view(graphiql=True))),
     path("", include('backend.urls')),
     re_path(r".*", ensure_csrf_cookie(TemplateView.as_view(template_name="index.html")), name="main"),
 ]
