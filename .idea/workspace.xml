@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3376044e-e523-4fff-b421-8ce37c6d0563" name="Changes" comment="add docker-compose.yaml of postgre">
+    <list default="true" id="3376044e-e523-4fff-b421-8ce37c6d0563" name="Changes" comment="support graphql authentication">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/schema.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/schema.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/photoshare/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/photoshare/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,7 +103,7 @@
       <updated>1669351434031</updated>
       <workItem from="1669351435421" duration="2634000" />
       <workItem from="1669420532232" duration="23279000" />
-      <workItem from="1669539256774" duration="30965000" />
+      <workItem from="1669539256774" duration="36923000" />
     </task>
     <task id="LOCAL-00001" summary="use graphql">
       <created>1669578216873</created>
@@ -127,7 +126,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669582978047</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="support graphql authentication">
+      <created>1669599348478</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1669599348478</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -147,6 +153,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="use graphql" />
     <MESSAGE value="add docker-compose.yaml of postgre" />
-    <option name="LAST_COMMIT_MESSAGE" value="add docker-compose.yaml of postgre" />
+    <MESSAGE value="support graphql authentication" />
+    <option name="LAST_COMMIT_MESSAGE" value="support graphql authentication" />
   </component>
 </project>

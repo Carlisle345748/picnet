@@ -1,3 +1,5 @@
+import hashlib
+
 from bson.objectid import ObjectId
 from django.conf import settings
 from django.utils import timezone
@@ -13,7 +15,6 @@ def auth(func):
         if "user_id" not in args[0].session:
             return Response({'code': 1003, 'msg': 'user not logged in'}, status=401)
         return func(*args, **kwargs)
-
     return auth_user
 
 
@@ -30,11 +31,17 @@ def test_count(request: Request):
 def add_photo(request: Request):
     try:
         img = request.FILES['uploadedphoto']
-        with open(f'{settings.MEDIA_ROOT}/{img.name}', 'wb') as f:
+
+        img_hash = hashlib.md5(img.file.read()).hexdigest()
+        suffix = img.name[img.name.rindex(".")+1:]
+        filename = f'{img_hash}.{suffix}'
+
+        with open(f'{settings.MEDIA_ROOT}/{filename}', 'wb') as f:
+            img.file.seek(0)
             f.write(img.file.read())
 
         photo = Photo.objects.create(
-            file_name=img.name,
+            file_name=filename,
             date_time=timezone.now(),
             user=User.objects.get(pk=ObjectId(request.session['user_id'])),
             comments=[],
