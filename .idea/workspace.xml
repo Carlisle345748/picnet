@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3376044e-e523-4fff-b421-8ce37c6d0563" name="Changes" comment="use graphql">
-      <change afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/f9257b5d-2151-4a91-accd-e21b90267566.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/f9257b5d-2151-4a91-accd-e21b90267566.xml" afterDir="false" />
+    <list default="true" id="3376044e-e523-4fff-b421-8ce37c6d0563" name="Changes" comment="add docker-compose.yaml of postgre">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/photoshare/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/photoshare/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/schema.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/schema.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/photoshare/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/photoshare/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -45,7 +41,7 @@
     ]
   }
 }]]></component>
-  <component name="RunManager" selected="Docker.docker-compose.yaml: Compose Deployment">
+  <component name="RunManager" selected="Django Server.photoshare">
     <configuration name="photoshare" type="Python.DjangoServer" factoryName="Django server">
       <module name="photoshare" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -108,7 +104,7 @@
       <updated>1669351434031</updated>
       <workItem from="1669351435421" duration="2634000" />
       <workItem from="1669420532232" duration="23279000" />
-      <workItem from="1669539256774" duration="20609000" />
+      <workItem from="1669539256774" duration="30965000" />
     </task>
     <task id="LOCAL-00001" summary="use graphql">
       <created>1669578216873</created>
@@ -117,7 +113,21 @@
       <option name="project" value="LOCAL" />
       <updated>1669578216873</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="use graphql">
+      <created>1669582964830</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1669582964830</updated>
+    </task>
+    <task id="LOCAL-00003" summary="add docker-compose.yaml of postgre">
+      <created>1669582978047</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1669582978047</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -136,27 +146,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="use graphql" />
-    <option name="LAST_COMMIT_MESSAGE" value="use graphql" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file:///opt/anaconda3/envs/photoShare/lib/python3.10/site-packages/django/middleware/csrf.py</url>
-          <line>234</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file:///opt/anaconda3/envs/photoShare/lib/python3.10/site-packages/django/middleware/csrf.py</url>
-          <line>408</line>
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file:///opt/anaconda3/envs/photoShare/lib/python3.10/site-packages/django/utils/deprecation.py</url>
-          <line>135</line>
-          <option name="timeStamp" value="11" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="add docker-compose.yaml of postgre" />
+    <option name="LAST_COMMIT_MESSAGE" value="add docker-compose.yaml of postgre" />
   </component>
 </project>

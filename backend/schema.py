@@ -6,6 +6,15 @@ from graphql import GraphQLError
 from .models import User, Photo, Comment
 
 
+def login_required(func):
+    def authenticate(*args, **kwargs):
+        info = args[1]
+        if "user_id" not in info.context.session:
+            raise GraphQLError(message="user not logged in")
+        return func(*args, **kwargs)
+    return authenticate
+
+
 class UserSchema(MongoengineObjectType):
     class Meta:
         model = User
@@ -40,6 +49,7 @@ class CreateComment(graphene.Mutation):
 
     comment = graphene.Field(CommentSchema)
 
+    @login_required
     def mutate(self, info, user_id, photo_id, comment):
         photo = Photo.objects.get(id=photo_id)
         c = Comment(date_time=timezone.now(), comment=comment, user=User.objects.get(id=user_id))
@@ -87,15 +97,19 @@ class Query(graphene.ObjectType):
     photo = graphene.Field(PhotoSchema, id=graphene.String(required=True))
     user = graphene.Field(UserSchema, id=graphene.String(required=True))
 
+    @login_required
     def resolve_photo(self, info, id):
         return Photo.objects.get(id=id)
 
+    @login_required
     def resolve_user(self, info, id):
         return User.objects.get(id=id)
 
+    @login_required
     def resolve_users(self, info):
         return User.objects.all()
 
+    @login_required
     def resolve_photos(self, info, user_id):
         return Photo.objects(user=user_id)
 

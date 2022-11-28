@@ -17,25 +17,16 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.http import JsonResponse
 from django.urls import include, path, re_path
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 from graphene_django.views import GraphQLView
 
 
-def auth(func):
-    def auth_user(*args, **kwargs):
-        if "user_id" not in args[0].session:
-            return JsonResponse({'code': 1003, 'msg': 'user not logged in'}, status=401)
-        return func(*args, **kwargs)
-    return auth_user
-
-
 urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + [
     path("admin/", admin.site.urls),
     # path("graphql", csrf_exempt(GraphQLView.as_view(graphiql=True))),
-    path("graphql", auth(GraphQLView.as_view(graphiql=True))),
+    path("graphql", GraphQLView.as_view(graphiql=True)),
     path("", include('backend.urls')),
     re_path(r".*", ensure_csrf_cookie(TemplateView.as_view(template_name="index.html")), name="main"),
 ]
