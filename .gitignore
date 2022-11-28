@@ -1,3 +1,7 @@
 /static/
 /media/
 /frontend/
+**/__pycache__
+/.idea/
+
+.DS_Store
