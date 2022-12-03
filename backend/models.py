@@ -27,5 +27,6 @@ class Photo(Document):
     date_time = DateTimeField(required=True, default=datetime.utcnow)
     comments = ListField(EmbeddedDocumentField(Comment))
     user = ReferenceField(User, required=True)
+    user_like = ListField(ReferenceField(User), default=[])
 
     meta = {'collection': 'backend_photo'}

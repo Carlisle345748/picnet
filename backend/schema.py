@@ -12,6 +12,7 @@ def login_required(func):
         if "user_id" not in info.context.session:
             raise GraphQLError(message="user not logged in")
         return func(*args, **kwargs)
+
     return authenticate
 
 
@@ -25,6 +26,14 @@ class PhotoSchema(MongoengineObjectType):
         model = Photo
 
     url = graphene.String()
+    user_like = graphene.List(UserSchema, first=graphene.Int(default_value=None))
+    is_like = graphene.Boolean(user_id=graphene.String(required=True))
+
+    def resolve_user_like(self, info, first):
+        return self.user_like[:first] if first is not None else self.user_like
+
+    def resolve_is_like(self, info, user_id):
+        return user_id in [str(u.id) for u in self.user_like]
 
     def resolve_url(self, info):
         return "/media/" + self.file_name
@@ -90,9 +99,26 @@ class CreateUser(graphene.Mutation):
         return CreateUser(user=user)
 
 
+class LikePhoto(graphene.Mutation):
+    class Arguments:
+        photo_id = graphene.String(required=True)
+        user_id = graphene.String(required=True)
+        like = graphene.Boolean(default_value=True)
+
+    photo = graphene.Field(PhotoSchema)
+
+    def mutate(self, info, photo_id, user_id, like):
+        photo = Photo.objects.get(id=photo_id)
+        photo.user_like = [user for user in photo.user_like if str(user.id) != user_id]
+        if like:
+            photo.user_like.append(User.objects.get(id=user_id))
+        photo.save()
+        return LikePhoto(photo=photo)
+
+
 class Query(graphene.ObjectType):
     users = graphene.List(UserSchema)
-    photos = graphene.List(PhotoSchema, user_id=graphene.String(required=True))
+    photos = graphene.List(PhotoSchema, user_id=graphene.String(default_value=None))
 
     photo = graphene.Field(PhotoSchema, id=graphene.String(required=True))
     user = graphene.Field(UserSchema, id=graphene.String(required=True))
@@ -111,12 +137,13 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_photos(self, info, user_id):
-        return Photo.objects(user=user_id)
+        return Photo.objects(user=user_id) if user_id else Photo.objects()
 
 
 class Mutations(graphene.ObjectType):
     create_comment = CreateComment.Field()
     create_user = CreateUser.Field()
+    like_photo = LikePhoto.Field()
 
 
 schema = graphene.Schema(query=Query,
