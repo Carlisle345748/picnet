@@ -8,6 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from .models import User, Photo
+from .utils import check_password
 
 
 def auth(func):
@@ -61,8 +62,10 @@ def login(request: Request):
     if not user:
         return Response({'code': 1001, 'msg': 'user not exist'}, status=400)
     user = user[0]
-    if request.data['password'] != user.password:
+
+    if not check_password(request.data['password'], user.salt, user.password):
         return Response({'code': 1002, 'msg': 'incorrect password'}, status=400)
+
     request.session['user_id'] = str(user.id)
     return Response({'code': 0, 'msg': "success", 'id': str(user.id)})
 

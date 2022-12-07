@@ -4,7 +4,7 @@ from graphene_mongo import MongoengineObjectType
 from graphql import GraphQLError
 
 from .models import User, Photo, Comment
-
+from .utils import hash_password, check_password
 
 def login_required(func):
     def authenticate(*args, **kwargs):
@@ -87,6 +87,7 @@ class CreateUser(graphene.Mutation):
         if User.objects(login_name=user_data.login_name).count() != 0:
             raise GraphQLError(message="login name exist")
 
+        password_hash, salt = hash_password(user_data.password)
         user = User(
             first_name=user_data.first_name,
             last_name=user_data.last_name,
@@ -94,7 +95,8 @@ class CreateUser(graphene.Mutation):
             description=user_data.description,
             occupation=user_data.occupation,
             login_name=user_data.login_name,
-            password=user_data.password,
+            password=password_hash,
+            salt=salt
         ).save()
         return CreateUser(user=user)
 

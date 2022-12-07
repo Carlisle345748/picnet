@@ -5,9 +5,11 @@ from datetime import datetime
 from django.db import migrations
 from django.utils import timezone
 from backend.models import *
+from backend.utils import hash_password
 
 
 def populate(apps, schema_editor):
+    pwd, salt = hash_password("123")
     im = User(
         first_name="Ian",
         last_name="Malcolm",
@@ -15,9 +17,11 @@ def populate(apps, schema_editor):
         description="Should've stayed in the car.",
         occupation="Mathematician",
         login_name="im",
-        password="123",
+        password=pwd,
+        salt=salt
     ).save()
 
+    pwd, salt = hash_password("123")
     er = User(
         first_name="Ellen",
         last_name="Ripley",
@@ -25,9 +29,11 @@ def populate(apps, schema_editor):
         description="Lvl 6 rating. Pilot.",
         occupation="Warrant Officer",
         login_name="er",
-        password="123",
+        password=pwd,
+        salt=salt
     ).save()
 
+    pwd, salt = hash_password("123")
     pt = User.objects.create(
         first_name="Peregrin",
         last_name="Took",
@@ -38,9 +44,11 @@ def populate(apps, schema_editor):
                     "all shall fade... all... shall... fade... ",
         occupation="Thain",
         login_name="pt",
-        password="123",
+        password=pwd,
+        salt=salt
     )
 
+    pwd, salt = hash_password("123")
     rk = User(
         first_name="Rey",
         last_name="Kenobi",
@@ -48,9 +56,11 @@ def populate(apps, schema_editor):
         description="Excited to be here!",
         occupation="Rebel",
         login_name="rk",
-        password="123",
+        password=pwd,
+        salt=salt
     ).save()
 
+    pwd, salt = hash_password("123")
     al = User(
         first_name="April",
         last_name="Ludgate",
@@ -58,9 +68,11 @@ def populate(apps, schema_editor):
         description="Witch",
         occupation="Animal Control",
         login_name="al",
-        password="123",
+        password=pwd,
+        salt=salt
     ).save()
 
+    pwd, salt = hash_password("123")
     jo = User(
         first_name="John",
         last_name="Ousterhout",
@@ -68,7 +80,8 @@ def populate(apps, schema_editor):
         description="<i>CS142!</i>",
         occupation="Professor",
         login_name="jo",
-        password="123",
+        password=pwd,
+        salt=salt
     ).save()
 
     def parse_time(time):

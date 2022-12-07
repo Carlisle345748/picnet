@@ -12,6 +12,7 @@ class User(Document):
     occupation = StringField()
     login_name = StringField(required=True)
     password = StringField(required=True)
+    salt = StringField(default="")
 
     meta = {'collection': 'backend_user'}
 
