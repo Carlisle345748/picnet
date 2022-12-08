@@ -4,7 +4,8 @@ from graphene_mongo import MongoengineObjectType
 from graphql import GraphQLError
 
 from .models import User, Photo, Comment
-from .utils import hash_password, check_password
+from .utils import hash_password
+
 
 def login_required(func):
     def authenticate(*args, **kwargs):
@@ -19,6 +20,16 @@ def login_required(func):
 class UserSchema(MongoengineObjectType):
     class Meta:
         model = User
+        exclude_fields = ['salt', 'password']
+
+    follower_count = graphene.Int()
+    following_count = graphene.Int()
+
+    def resolve_follower_count(self, info):
+        return len(self.follower)
+
+    def resolve_following_count(self, info):
+        return len(self.following)
 
 
 class PhotoSchema(MongoengineObjectType):

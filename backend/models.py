@@ -13,6 +13,9 @@ class User(Document):
     login_name = StringField(required=True)
     password = StringField(required=True)
     salt = StringField(default="")
+    avatar = StringField(default="/")
+    follower = ListField(LazyReferenceField('self'), default=[])
+    following = ListField(LazyReferenceField('self'), default=[])
 
     meta = {'collection': 'backend_user'}
 
@@ -20,14 +23,14 @@ class User(Document):
 class Comment(EmbeddedDocument):
     comment = StringField(required=True)
     date_time = DateTimeField(required=True, default=datetime.utcnow)
-    user = ReferenceField(User, required=True)
+    user = LazyReferenceField(User, required=True)
 
 
 class Photo(Document):
     file_name = StringField(required=True)
     date_time = DateTimeField(required=True, default=datetime.utcnow)
     comments = ListField(EmbeddedDocumentField(Comment))
-    user = ReferenceField(User, required=True)
-    user_like = ListField(ReferenceField(User), default=[])
+    user = LazyReferenceField(User, required=True)
+    user_like = ListField(LazyReferenceField(User), default=[])
 
     meta = {'collection': 'backend_photo'}
