@@ -35,6 +35,4 @@ class Mutations(graphene.ObjectType):
     logout = Logout.Field()
 
 
-schema = graphene.Schema(query=Query,
-                         mutation=Mutations,
-                         types=[UserSchema, PhotoSchema, CommentSchema])
+schema = graphene.Schema(query=Query, mutation=Mutations)

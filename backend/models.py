@@ -14,8 +14,8 @@ class User(Document):
     password = StringField(required=True)
     salt = StringField(default="")
     avatar = StringField(default="/")
-    follower = ListField(LazyReferenceField('self'), default=[])
-    following = ListField(LazyReferenceField('self'), default=[])
+    follower = ListField(LazyReferenceField('User'), default=[])
+    following = ListField(LazyReferenceField('User'), default=[])
 
     meta = {'collection': 'backend_user'}
 
