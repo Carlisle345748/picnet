@@ -12,27 +12,19 @@ class MongoengineAuthConnectionField(MongoengineConnectionField):
 
 
 class Query(graphene.ObjectType):
-    users = graphene.List(UserSchema)
-    photos = graphene.List(PhotoSchema, user_id=graphene.String(default_value=None))
+    users = MongoengineAuthConnectionField(UserSchema)
+    photos = MongoengineAuthConnectionField(PhotoSchema)
 
-    photo = graphene.Field(PhotoSchema, id=graphene.String(required=True))
-    user = graphene.Field(UserSchema, id=graphene.String(required=True))
-
-    @login_required
-    def resolve_photo(self, info, id):
-        return Photo.objects.get(id=id)
+    photo = graphene.Field(PhotoSchema, id=graphene.ID(required=True))
+    user = graphene.Field(UserSchema, id=graphene.ID(required=True))
 
     @login_required
     def resolve_user(self, info, id):
-        return User.objects.get(id=id)
+        return User.objects.get(id=to_mongo_id(id))
 
     @login_required
-    def resolve_users(self, info):
-        return User.objects.all()
-
-    @login_required
-    def resolve_photos(self, info, user_id):
-        return Photo.objects(user=user_id) if user_id else Photo.objects()
+    def resolve_photo(self, info, id):
+        return Photo.objects.get(id=to_mongo_id(id))
 
 
 class Mutations(graphene.ObjectType):

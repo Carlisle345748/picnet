@@ -58,6 +58,7 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 GRAPHENE = {
     'SCHEMA': 'backend.schema.schema',
+    'MIDDLEWARE': []
 }
 
 ROOT_URLCONF = 'photoshare.urls'

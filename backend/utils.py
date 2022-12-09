@@ -2,6 +2,7 @@ import hashlib
 import secrets
 
 from graphql import GraphQLError
+from graphene.relay.node import from_global_id
 
 
 def hash_password(password: str) -> (str, str):
@@ -23,3 +24,7 @@ def login_required(func):
         return func(*args, **kwargs)
 
     return authenticate
+
+
+def to_mongo_id(global_id):
+    return from_global_id(global_id).id

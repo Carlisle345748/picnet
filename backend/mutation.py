@@ -1,21 +1,25 @@
 from graphql import GraphQLError
 
 from backend.types import *
-from backend.utils import login_required, hash_password, check_password
+from backend.utils import login_required, hash_password, check_password, to_mongo_id
 
 
 class CreateComment(graphene.Mutation):
     class Arguments:
-        user_id = graphene.String(required=True)
-        photo_id = graphene.String(required=True)
+        user_id = graphene.ID(required=True)
+        photo_id = graphene.ID(required=True)
         comment = graphene.String(required=True)
 
     comment = graphene.Field(CommentSchema)
 
     @login_required
     def mutate(self, info, user_id, photo_id, comment):
-        photo = Photo.objects.get(id=photo_id)
-        c = Comment(date_time=timezone.now(), comment=comment, user=User.objects.get(id=user_id))
+        photo = Photo.objects.get(id=to_mongo_id(photo_id))
+        c = Comment(
+            date_time=timezone.now(),
+            comment=comment,
+            user=User.objects.get(id=to_mongo_id(user_id))
+        )
         photo.comments.append(c)
         photo.save()
         return CreateComment(comment=c)
@@ -57,13 +61,15 @@ class CreateUser(graphene.Mutation):
 
 class LikePhoto(graphene.Mutation):
     class Arguments:
-        photo_id = graphene.String(required=True)
-        user_id = graphene.String(required=True)
+        photo_id = graphene.ID(required=True)
+        user_id = graphene.ID(required=True)
         like = graphene.Boolean(default_value=True)
 
     photo = graphene.Field(PhotoSchema)
 
     def mutate(self, info, photo_id, user_id, like):
+        user_id = to_mongo_id(user_id)
+        photo_id = to_mongo_id(photo_id)
         photo = Photo.objects.get(id=photo_id)
         photo.user_like = [user for user in photo.user_like if str(user.id) != user_id]
         if like:
@@ -72,27 +78,21 @@ class LikePhoto(graphene.Mutation):
         return LikePhoto(photo=photo)
 
 
-class Error(graphene.ObjectType):
-    code = graphene.Int()
-    msg = graphene.String()
-
-
 class Login(graphene.Mutation):
     class Arguments:
         login_name = graphene.String(required=True)
         password = graphene.String(required=True)
 
     user = graphene.Field(UserSchema)
-    error = graphene.Field(Error)
 
     def mutate(self, info, login_name, password):
         user = User.objects(login_name=login_name)
         if not user:
-            return Login(error=Error(code=1001, msg="user not exist"))
+            raise GraphQLError("user not exist", extensions={"code": 1001, "msg": "user not exist"})
         user = user[0]
 
         if not check_password(password, user.salt, user.password):
-            return Login(error=Error(code=1002, msg="incorrect password"))
+            raise GraphQLError("incorrect password", extensions={"code": 1002, "msg": "incorrect password"})
 
         info.context.session['user_id'] = str(user.id)
         return Login(user=user)
@@ -102,8 +102,8 @@ class Logout(graphene.Mutation):
     class Argument:
         pass
 
-    error = graphene.Field(Error)
+    msg = graphene.String()
 
     def mutate(self, info):
         del info.context.session['user_id']
-        return Logout(Error(code=0, msg="success"))
+        return Logout(msg="success")
