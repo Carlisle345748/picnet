@@ -3,9 +3,16 @@ import random
 
 from django.db import migrations
 from django.utils import timezone
+from faker import Faker
 
 from backend.models import *
 from backend.utils import hash_password
+
+fake = Faker()
+
+
+def fake_avatar():
+    return f"https://picsum.photos/seed/${fake.md5()}/150/150"
 
 
 def populate(apps, schema_editor):
@@ -17,6 +24,7 @@ def populate(apps, schema_editor):
         description="Should've stayed in the car.",
         occupation="Mathematician",
         login_name="im",
+        avatar=fake_avatar(),
         password=pwd,
         salt=salt
     ).save()
@@ -29,6 +37,7 @@ def populate(apps, schema_editor):
         description="Lvl 6 rating. Pilot.",
         occupation="Warrant Officer",
         login_name="er",
+        avatar=fake_avatar(),
         password=pwd,
         salt=salt
     ).save()
@@ -44,6 +53,7 @@ def populate(apps, schema_editor):
                     "all shall fade... all... shall... fade... ",
         occupation="Thain",
         login_name="pt",
+        avatar=fake_avatar(),
         password=pwd,
         salt=salt
     )
@@ -56,6 +66,7 @@ def populate(apps, schema_editor):
         description="Excited to be here!",
         occupation="Rebel",
         login_name="rk",
+        avatar=fake_avatar(),
         password=pwd,
         salt=salt
     ).save()
@@ -68,6 +79,7 @@ def populate(apps, schema_editor):
         description="Witch",
         occupation="Animal Control",
         login_name="al",
+        avatar=fake_avatar(),
         password=pwd,
         salt=salt
     ).save()
@@ -81,6 +93,7 @@ def populate(apps, schema_editor):
         occupation="Professor",
         login_name="jo",
         password=pwd,
+        avatar=fake_avatar(),
         salt=salt
     ).save()
 
