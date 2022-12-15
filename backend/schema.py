@@ -1,12 +1,12 @@
 from graphene_mongo import MongoengineConnectionField
 
 from .mutation import *
-from .utils import login_required
+from .utils import login_required, get_query_fields
 
 
 class MongoengineAuthConnectionField(MongoengineConnectionField):
     def default_resolver(self, _root, info, required_fields=None, resolved=None, **args):
-        if "user_id" not in info.context.session:
+        if not info.context.user.is_authenticated:
             raise GraphQLError(message="user not logged in")
         return super().default_resolver(_root, info, required_fields, resolved, **args)
 
@@ -20,11 +20,13 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_user(self, info, id):
-        return User.objects.get(id=to_mongo_id(id))
+        required_fields = get_query_fields(info, User)
+        return User.objects.only(*required_fields).get(id=to_mongo_id(id))
 
     @login_required
     def resolve_photo(self, info, id):
-        return Photo.objects.get(id=to_mongo_id(id))
+        required_fields = get_query_fields(info, Photo)
+        return Photo.objects.only(*required_fields).get(id=to_mongo_id(id))
 
 
 class Mutations(graphene.ObjectType):

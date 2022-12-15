@@ -4,15 +4,26 @@ from datetime import datetime
 connect('photo', username='root', password='123456', authentication_source='admin')
 
 
+class BaseUser(Document):
+    id = IntField(db_field='id')
+    obj_id = ObjectIdField(db_field='_id')
+    first_name = StringField()
+    last_name = StringField()
+    username = StringField()
+    password = StringField()
+    email = StringField()
+    is_active = BooleanField()
+    is_staff = BooleanField()
+    is_superuser = BooleanField()
+    last_login = StringField()
+    date_joined = DateTimeField()
+
+    meta = {'collection': 'auth_user', 'id_field': 'obj_id'}
+
+
 class User(Document):
-    first_name = StringField(required=True, max_length=50)
-    last_name = StringField(required=True, max_length=50)
-    location = StringField()
+    base_user = LazyReferenceField(BaseUser, passthrough=True)
     description = StringField()
-    occupation = StringField()
-    login_name = StringField(required=True)
-    password = StringField(required=True)
-    salt = StringField(default="")
     avatar = StringField(default="/")
     follower = ListField(LazyReferenceField('User'), default=[])
     following = ListField(LazyReferenceField('User'), default=[])
