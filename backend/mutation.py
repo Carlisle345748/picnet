@@ -1,10 +1,9 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User as AuthUser
-from django.db import DatabaseError
+from djongo.database import IntegrityError
 from graphql import GraphQLError
 
 from backend.types import *
-from backend.utils import login_required, to_mongo_id, get_query_fields
+from backend.utils import login_required, to_model_id
 
 
 class CreateComment(graphene.Mutation):
@@ -15,19 +14,15 @@ class CreateComment(graphene.Mutation):
 
     comment = graphene.Field(CommentSchema)
 
-    # TODO only query necessary field
-    # TODO use add_to_set
     @login_required
     def mutate(self, info, user_id, photo_id, comment):
-        photo = Photo.objects.get(id=to_mongo_id(photo_id))
-        c = Comment(
-            date_time=timezone.now(),
+        new_comment = Comment(
             comment=comment,
-            user=User.objects.get(id=to_mongo_id(user_id))
+            user=User.objects.get(pk=to_model_id(user_id)),
+            photo=Photo.objects.get(pk=to_model_id(photo_id))
         )
-        photo.comments.append(c)
-        photo.save()
-        return CreateComment(comment=c)
+        new_comment.save()
+        return CreateComment(comment=new_comment)
 
 
 class UserInput(graphene.InputObjectType):
@@ -47,17 +42,16 @@ class CreateUser(graphene.Mutation):
 
     def mutate(self, info, user_data):
         try:
-            auth_user = AuthUser.objects.create_user(
+            user = User.objects.create_user(
                 username=user_data.username,
                 email=user_data.email,
                 password=user_data.password,
                 first_name=user_data.first_name,
                 last_name=user_data.last_name
             )
-            base_user = BaseUser.objects.only('id').get(id=auth_user.id)
-            user = User(base_user=base_user, description=user_data.description).save()
+            Profile(user=user, description=user_data.description).save()
             return CreateUser(user=user)
-        except DatabaseError:
+        except IntegrityError:
             raise GraphQLError(message="username already exist",
                                extensions={"code": 1002, "msg": "username already exist"})
 
@@ -70,15 +64,15 @@ class LikePhoto(graphene.Mutation):
 
     photo = graphene.Field(PhotoSchema)
 
+    @login_required
     def mutate(self, info, photo_id, user_id, like):
-        user_id = to_mongo_id(user_id)
-        photo_id = to_mongo_id(photo_id)
+        user = User.objects.get(pk=to_model_id(user_id))
+        photo = Photo.objects.get(pk=to_model_id(photo_id))
         if like:
-            Photo.objects(id=photo_id).update_one(add_to_set__user_like=user_id)
+            photo.user_like.add(user)
         else:
-            Photo.objects(id=photo_id).update_one(pull__user_like=user_id)
-        required_fields = get_query_fields(info, Photo, depth=1)
-        return LikePhoto(photo=Photo.objects.only(*required_fields).get(id=photo_id))
+            photo.user_like.remove(user)
+        return LikePhoto(photo=photo)
 
 
 class Login(graphene.Mutation):
@@ -94,9 +88,7 @@ class Login(graphene.Mutation):
             raise GraphQLError(message="incorrect username or password",
                                extensions={"code": 1001, "msg": "incorrect username or password"})
         login(info.context, user)
-        base_user = BaseUser.objects.only('id').get(id=user.id)
-        required_fields = get_query_fields(info, User, depth=1)
-        return Login(user=User.objects.only(*required_fields).get(base_user=base_user))
+        return Login(user=user)
 
 
 class Logout(graphene.Mutation):

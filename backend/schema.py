@@ -1,32 +1,39 @@
-from graphene_mongo import MongoengineConnectionField
+from graphene_django.filter import DjangoFilterConnectionField
 
 from .mutation import *
-from .utils import login_required, get_query_fields
+from .utils import login_required
 
 
-class MongoengineAuthConnectionField(MongoengineConnectionField):
-    def default_resolver(self, _root, info, required_fields=None, resolved=None, **args):
+class AuthDjangoFilterConnectionField(DjangoFilterConnectionField):
+    @classmethod
+    def resolve_queryset(
+            cls, conn, iterable, info, args, filtering_args, filterset_class
+    ):
         if not info.context.user.is_authenticated:
             raise GraphQLError(message="user not logged in")
-        return super().default_resolver(_root, info, required_fields, resolved, **args)
+        return super().resolve_queryset(conn, iterable, info, args, filtering_args, filterset_class)
 
 
 class Query(graphene.ObjectType):
-    users = MongoengineAuthConnectionField(UserSchema)
-    photos = MongoengineAuthConnectionField(PhotoSchema)
+    users = AuthDjangoFilterConnectionField(UserSchema)
+    photos = AuthDjangoFilterConnectionField(PhotoSchema)
+    profiles = AuthDjangoFilterConnectionField(ProfileSchema)
 
     photo = graphene.Field(PhotoSchema, id=graphene.ID(required=True))
     user = graphene.Field(UserSchema, id=graphene.ID(required=True))
+    profile = graphene.Field(ProfileSchema, user_id=graphene.ID(required=True))
 
     @login_required
     def resolve_user(self, info, id):
-        required_fields = get_query_fields(info, User)
-        return User.objects.only(*required_fields).get(id=to_mongo_id(id))
+        return User.objects.get(pk=to_model_id(id))
 
     @login_required
     def resolve_photo(self, info, id):
-        required_fields = get_query_fields(info, Photo)
-        return Photo.objects.only(*required_fields).get(id=to_mongo_id(id))
+        return Photo.objects.get(pk=to_model_id(id))
+
+    @login_required
+    def resolve_profile(self, info, user_id):
+        return Profile.objects.get(user_id=to_model_id(user_id))
 
 
 class Mutations(graphene.ObjectType):

@@ -1,94 +1,59 @@
 import graphene
-from django.utils import timezone
-from graphene_mongo import MongoengineObjectType
+from graphene_django import DjangoObjectType
 
 from backend.models import *
-from backend.utils import to_mongo_id
+from backend.utils import to_model_id
 
 
-class BaseUserSchema(MongoengineObjectType):
+class ProfileSchema(DjangoObjectType):
     class Meta:
-        model = BaseUser
+        model = Profile
         interfaces = (graphene.Node,)
-        only_fields = ('username', 'first_name', 'last_name', 'email')
-
-
-class UserSchema(MongoengineObjectType):
-    class Meta:
-        model = User
-        interfaces = (graphene.Node,)
-        exclude_fields = ('base_user',)
-
-    username = graphene.String()
-    first_name = graphene.String()
-    last_name = graphene.String()
-    email = graphene.String()
+        fields = "__all__"
+        filter_fields = ['user']
 
     follower_count = graphene.Int()
     following_count = graphene.Int()
 
-    def resolve_username(self, info):
-        if not self.base_user:
-            self.reload('base_user')
-        return self.base_user.username
-
-    def resolve_first_name(self, info):
-        if not self.base_user:
-            self.reload('base_user')
-        return self.base_user.first_name
-
-    def resolve_last_name(self, info):
-        if not self.base_user:
-            self.reload('base_user')
-        return self.base_user.last_name
-
-    def resolve_email(self, info):
-        if not self.base_user:
-            self.reload('base_user')
-        return self.base_user.email
-
     def resolve_follower_count(self, info):
-        pipeline = [
-            {"$match": {"_id": self.id}},
-            {"$project": {"count": {"$size": "$follower"}}}
-        ]
-        data = list(User.objects.aggregate(pipeline))
-        return data[0]['count']
+        return self.follower.count()
 
     def resolve_following_count(self, info):
-        pipeline = [
-            {"$match": {"_id": self.id}},
-            {"$project": {"count": {"$size": "$following"}}}
-        ]
-        data = list(User.objects.aggregate(pipeline))
-        return data[0]['count']
+        return self.following.count()
 
 
-class CommentSchema(MongoengineObjectType):
+class UserSchema(DjangoObjectType):
+    class Meta:
+        model = User
+        interfaces = (graphene.Node,)
+        fields = ('username', 'first_name', 'last_name', 'email')
+        filter_fields = ['id', 'username']
+
+    profile = graphene.Field(ProfileSchema)
+
+    def resolve_profile(self, info):
+        return self.profile
+
+
+class CommentSchema(DjangoObjectType):
     class Meta:
         model = Comment
         interfaces = (graphene.Node,)
-
-    def resolve_date_time(self, info):
-        return timezone.make_aware(self.date_time, timezone.utc)
+        fields = "__all__"
 
 
-class PhotoSchema(MongoengineObjectType):
+class PhotoSchema(DjangoObjectType):
     class Meta:
         model = Photo
         interfaces = (graphene.Node,)
+        fields = "__all__"
+        filter_fields = ['id', 'user']
 
     url = graphene.String()
     is_like = graphene.Boolean(user_id=graphene.ID(required=True))
 
     def resolve_is_like(self, info, user_id):
-        user_id = to_mongo_id(user_id)
-        return Photo.objects(Q(id=self.id) & Q(user_like=user_id)).count() != 0
+        return self.user_like.filter(pk=to_model_id(user_id)).exists()
 
     def resolve_url(self, info):
-        if not self.file_name:
-            self.reload('file_name')
         return "/media/" + self.file_name
-
-    def resolve_date_time(self, info):
-        return timezone.make_aware(self.date_time, timezone.utc)

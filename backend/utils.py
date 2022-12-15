@@ -30,7 +30,7 @@ def login_required(func):
     return authenticate
 
 
-def to_mongo_id(global_id: str) -> str:
+def to_model_id(global_id: str) -> str:
     return from_global_id(global_id).id
 
 

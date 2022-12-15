@@ -54,8 +54,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
-
 GRAPHENE = {
     'SCHEMA': 'backend.schema.schema',
     'MIDDLEWARE': []
@@ -87,11 +85,12 @@ WSGI_APPLICATION = 'photoshare.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": "djongo",
-        "NAME": "photo",
-        "CLIENT": {
-            "host": "mongodb://root:123456@localhost:27017",
-        }
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "photoshare",
+        'USER': 'postgres',
+        'PASSWORD': 'example',
+        'HOST': '127.0.0.1',
+        'PORT': '5432'
     }
 }
 
@@ -147,3 +146,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = "media/"
 
 MEDIA_ROOT = "media/"
+
+LOGGING = {
+    'version': 1,
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        }
+    },
+    # 'loggers': {
+    #     'django.db.backends': {
+    #         'level': 'DEBUG',
+    #         'handlers': ['console'],
+    #     }
+    # }
+}
