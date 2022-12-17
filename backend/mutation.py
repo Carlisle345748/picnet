@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from djongo.database import IntegrityError
 from graphql import GraphQLError
 
+from backend.errors import ERR_USERNAME_EXIST, ERR_LOGIN
 from backend.types import *
 from backend.utils import login_required, to_model_id
 
@@ -52,8 +53,7 @@ class CreateUser(graphene.Mutation):
             Profile(user=user, description=user_data.description).save()
             return CreateUser(user=user)
         except IntegrityError:
-            raise GraphQLError(message="username already exist",
-                               extensions={"code": 1002, "msg": "username already exist"})
+            raise GraphQLError(message="username already exist", extensions=ERR_USERNAME_EXIST)
 
 
 class LikePhoto(graphene.Mutation):
@@ -85,8 +85,7 @@ class Login(graphene.Mutation):
     def mutate(self, info, username, password):
         user = authenticate(username=username, password=password)
         if user is None:
-            raise GraphQLError(message="incorrect username or password",
-                               extensions={"code": 1001, "msg": "incorrect username or password"})
+            raise GraphQLError(message="incorrect username or password", extensions=ERR_LOGIN)
         login(info.context, user)
         return Login(user=user)
 

@@ -1,5 +1,6 @@
 from graphene_django.filter import DjangoFilterConnectionField
 
+from .errors import ERR_NOT_LOGIN
 from .mutation import *
 from .utils import login_required
 
@@ -10,7 +11,7 @@ class AuthDjangoFilterConnectionField(DjangoFilterConnectionField):
             cls, conn, iterable, info, args, filtering_args, filterset_class
     ):
         if not info.context.user.is_authenticated:
-            raise GraphQLError(message="user not logged in")
+            raise GraphQLError(message="user not logged in", extensions=ERR_NOT_LOGIN)
         return super().resolve_queryset(conn, iterable, info, args, filtering_args, filterset_class)
 
 

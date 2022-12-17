@@ -8,6 +8,8 @@ from graphene_mongo.utils import get_query_fields as get_fields
 from graphql import GraphQLError, GraphQLResolveInfo
 from mongoengine.base import TopLevelDocumentMetaclass
 
+from backend.errors import ERR_NOT_LOGIN
+
 
 def hash_password(password: str) -> (str, str):
     salt = secrets.token_hex(8)
@@ -24,7 +26,7 @@ def login_required(func):
     def authenticate(*args, **kwargs):
         info = args[1]
         if not info.context.user.is_authenticated:
-            raise GraphQLError(message="user not logged in")
+            raise GraphQLError(message="user not logged in", extensions=ERR_NOT_LOGIN)
         return func(*args, **kwargs)
 
     return authenticate

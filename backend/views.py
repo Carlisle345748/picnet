@@ -1,13 +1,12 @@
 import hashlib
 
-from bson.objectid import ObjectId
 from django.conf import settings
-from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from .errors import *
 from .models import User, Photo
 from .utils import check_password
 
@@ -23,6 +22,8 @@ def test_count(request: Request):
 @api_view(["POST"])
 @login_required
 def add_photo(request: Request):
+    if not request.user.is_authenticated:
+        return Response(ERR_NOT_LOGIN, status=400)
     try:
         img = request.FILES['uploadedphoto']
 
@@ -38,10 +39,10 @@ def add_photo(request: Request):
         photo.save()
         return Response({"id": str(photo.id), "code": 0, "msg": "success"})
     except KeyError:
-        return Response({"code": 1006, "msg": "photo not found"}, status=400)
+        return Response(ERR_NOT_LOGIN, status=400)
     except Exception as e:
         print(e)
-        return Response({"code": 1007, "msg": "save file failed"}, status=500)
+        return Response(ERR_SAVE_PHOTO, status=500)
 
 
 @api_view(['POST'])
