@@ -56,7 +56,7 @@ class CreateUser(graphene.Mutation):
             raise GraphQLError(message="username already exist", extensions=ERR_USERNAME_EXIST)
 
 
-class LikePhoto(graphene.Mutation):
+class UpdatePhotoLike(graphene.Mutation):
     class Arguments:
         photo_id = graphene.ID(required=True)
         user_id = graphene.ID(required=True)
@@ -72,7 +72,29 @@ class LikePhoto(graphene.Mutation):
             photo.user_like.add(user)
         else:
             photo.user_like.remove(user)
-        return LikePhoto(photo=photo)
+        return UpdatePhotoLike(photo=photo)
+
+
+class UpdateFollower(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.ID(required=True)
+        follow_id = graphene.ID(required=True)
+        follow = graphene.Boolean(required=True)
+
+    user = graphene.Field(UserSchema)
+    follow_user = graphene.Field(UserSchema)
+
+    @login_required
+    def mutate(self, info, user_id, follow_id, follow):
+        user = User.objects.get(pk=to_model_id(user_id))
+        follow_user = User.objects.get(pk=to_model_id(follow_id))
+        if follow:
+            user.profile.following.add(follow_user)
+            follow_user.profile.follower.add(user)
+        else:
+            user.profile.following.remove(follow_user)
+            follow_user.profile.follower.remove(user)
+        return UpdateFollower(user=user, follow_user=follow_user)
 
 
 class Login(graphene.Mutation):

@@ -14,12 +14,16 @@ class ProfileSchema(DjangoObjectType):
 
     follower_count = graphene.Int()
     following_count = graphene.Int()
+    is_following = graphene.Boolean(user_id=graphene.ID(required=True))
 
     def resolve_follower_count(self, info):
         return self.follower.count()
 
     def resolve_following_count(self, info):
         return self.following.count()
+
+    def resolve_is_following(self, info, user_id):
+        return self.follower.filter(pk=to_model_id(user_id)).exists()
 
 
 class UserSchema(DjangoObjectType):

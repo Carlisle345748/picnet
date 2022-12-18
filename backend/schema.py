@@ -40,7 +40,8 @@ class Query(graphene.ObjectType):
 class Mutations(graphene.ObjectType):
     create_comment = CreateComment.Field()
     create_user = CreateUser.Field()
-    like_photo = LikePhoto.Field()
+    update_photo_like = UpdatePhotoLike.Field()
+    update_follower = UpdateFollower.Field()
     login = Login.Field()
     logout = Logout.Field()
 
