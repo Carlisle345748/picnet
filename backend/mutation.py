@@ -7,6 +7,30 @@ from backend.types import *
 from backend.utils import login_required, to_model_id
 
 
+class ProfileInput(graphene.InputObjectType):
+    first_name = graphene.String(required=True)
+    last_name = graphene.String(required=True)
+    description = graphene.String(default="")
+
+
+class UpdateProfile(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.ID(required=True)
+        profile_data = ProfileInput(required=True)
+
+    user = graphene.Field(UserSchema)
+
+    @login_required
+    def mutate(self, info, user_id, profile_data: ProfileInput):
+        user = User.objects.select_related('profile').get(pk=to_model_id(user_id))
+        user.first_name = profile_data.first_name
+        user.last_name = profile_data.last_name
+        user.profile.description = profile_data.description
+        user.save()
+        user.profile.save()
+        return UpdateProfile(user=user)
+
+
 class CreateComment(graphene.Mutation):
     class Arguments:
         user_id = graphene.ID(required=True)
@@ -29,10 +53,10 @@ class CreateComment(graphene.Mutation):
 class UserInput(graphene.InputObjectType):
     username = graphene.String(required=True)
     password = graphene.String(required=True)
-    email = graphene.String(required=True)
+    email = graphene.String(default="")
     first_name = graphene.String(required=True)
     last_name = graphene.String(required=True)
-    description = graphene.String(required=True)
+    description = graphene.String(default="")
 
 
 class CreateUser(graphene.Mutation):

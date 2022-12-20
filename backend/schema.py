@@ -26,7 +26,7 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_user(self, info, id):
-        return User.objects.get(pk=to_model_id(id))
+        return User.objects.select_related('profile').get(pk=to_model_id(id))
 
     @login_required
     def resolve_photo(self, info, id):
@@ -34,7 +34,7 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_profile(self, info, user_id):
-        return Profile.objects.get(user_id=to_model_id(user_id))
+        return Profile.objects.select_related('user').get(user_id=to_model_id(user_id))
 
 
 class Mutations(graphene.ObjectType):
@@ -42,6 +42,7 @@ class Mutations(graphene.ObjectType):
     create_user = CreateUser.Field()
     update_photo_like = UpdatePhotoLike.Field()
     update_follower = UpdateFollower.Field()
+    update_profile = UpdateProfile.Field()
     login = Login.Field()
     logout = Logout.Field()
 

@@ -6,5 +6,5 @@ app_name = 'photo'
 
 urlpatterns = [
     path("photos/new", views.add_photo),
-    path('test/', views.test_count),
+    path("user/avatar", views.update_avatar),
 ]

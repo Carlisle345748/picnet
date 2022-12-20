@@ -1,22 +1,12 @@
-import hashlib
-
-from django.conf import settings
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from .errors import *
-from .models import User, Photo
-from .utils import check_password
-
-
-@api_view(['GET'])
-def test_count(request: Request):
-    return Response({
-        "user": User.objects.count(),
-        "photo": Photo.objects.count(),
-    })
+from .models import Photo
+from .utils import save_image
 
 
 @api_view(["POST"])
@@ -25,43 +15,38 @@ def add_photo(request: Request):
     if not request.user.is_authenticated:
         return Response(ERR_NOT_LOGIN, status=400)
     try:
-        img = request.FILES['uploadedphoto']
-
-        img_hash = hashlib.md5(img.file.read()).hexdigest()
-        suffix = img.name[img.name.rindex(".")+1:]
-        filename = f'{img_hash}.{suffix}'
-
-        with open(f'{settings.MEDIA_ROOT}/{filename}', 'wb') as f:
-            img.file.seek(0)
-            f.write(img.file.read())
-
-        photo = Photo(file_name=filename,user=request.user)
+        filename = save_image(request.FILES['uploadedphoto'])
+        photo = Photo(file_name=filename, user=request.user)
         photo.save()
         return Response({"id": str(photo.id), "code": 0, "msg": "success"})
     except KeyError:
-        return Response(ERR_NOT_LOGIN, status=400)
-    except Exception as e:
-        print(e)
-        return Response(ERR_SAVE_PHOTO, status=500)
+        return Response(ERR_PHOTO_NOT_FOUND, status=400)
 
 
-@api_view(['POST'])
-def login(request: Request):
-    login_name = request.data['login_name']
-    user = User.objects(login_name=login_name)
-    if not user:
-        return Response({'code': 1001, 'msg': 'user not exist'}, status=400)
-    user = user[0]
-
-    if not check_password(request.data['password'], user.salt, user.password):
-        return Response({'code': 1002, 'msg': 'incorrect password'}, status=400)
-
-    request.session['user_id'] = str(user.id)
-    return Response({'code': 0, 'msg': "success", 'id': str(user.id)})
-
-
-@api_view(['POST'])
+@api_view(["POST"])
 @login_required
+def update_avatar(request: Request):
+    if not request.user.is_authenticated:
+        return Response(ERR_NOT_LOGIN, status=400)
+    try:
+        filename = save_image(request.FILES['UploadAvatar'])
+        profile = request.user.profile
+        profile.avatar = "/media/" + filename
+        profile.save()
+        return Response({"code": 0, "msg": "success"})
+    except KeyError:
+        return Response(ERR_PHOTO_NOT_FOUND, status=400)
+
+
+@api_view(["POST"])
+def login(request: Request):
+    user = authenticate(username=request.data['username'], password=request.data['password'])
+    if user is None:
+        return Response(ERR_LOGIN, status=400)
+    auth_login(request, user)
+
+
+@api_view(["POST"])
 def logout(request: Request):
-    del request.session['user_id']
-    return Response({})
+    auth_logout(request)
+    return Response({"code": 0, "msg": "success"})

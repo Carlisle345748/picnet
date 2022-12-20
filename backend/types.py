@@ -30,13 +30,8 @@ class UserSchema(DjangoObjectType):
     class Meta:
         model = User
         interfaces = (graphene.Node,)
-        fields = ('username', 'first_name', 'last_name', 'email')
+        fields = ('username', 'first_name', 'last_name', 'email', 'profile')
         filter_fields = ['id', 'username']
-
-    profile = graphene.Field(ProfileSchema)
-
-    def resolve_profile(self, info):
-        return self.profile
 
 
 class CommentSchema(DjangoObjectType):
