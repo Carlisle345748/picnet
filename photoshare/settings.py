@@ -58,7 +58,7 @@ MIDDLEWARE = [
 
 GRAPHENE = {
     'SCHEMA': 'backend.schema.schema',
-    'MIDDLEWARE': []
+    'MIDDLEWARE': ['backend.schema.AuthorizationMiddleware']
 }
 
 ROOT_URLCONF = 'photoshare.urls'

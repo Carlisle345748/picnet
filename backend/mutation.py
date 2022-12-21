@@ -4,7 +4,7 @@ from graphql import GraphQLError
 
 from backend.errors import ERR_USERNAME_EXIST, ERR_LOGIN
 from backend.types import *
-from backend.utils import login_required, to_model_id
+from backend.utils import to_model_id
 
 
 class ProfileInput(graphene.InputObjectType):
@@ -20,7 +20,6 @@ class UpdateProfile(graphene.Mutation):
 
     user = graphene.Field(UserSchema)
 
-    @login_required
     def mutate(self, info, user_id, profile_data: ProfileInput):
         user = User.objects.select_related('profile').get(pk=to_model_id(user_id))
         user.first_name = profile_data.first_name
@@ -39,7 +38,6 @@ class CreateComment(graphene.Mutation):
 
     comment = graphene.Field(CommentSchema)
 
-    @login_required
     def mutate(self, info, user_id, photo_id, comment):
         new_comment = Comment(
             comment=comment,
@@ -88,7 +86,6 @@ class UpdatePhotoLike(graphene.Mutation):
 
     photo = graphene.Field(PhotoSchema)
 
-    @login_required
     def mutate(self, info, photo_id, user_id, like):
         user = User.objects.get(pk=to_model_id(user_id))
         photo = Photo.objects.get(pk=to_model_id(photo_id))
@@ -108,7 +105,6 @@ class UpdateFollower(graphene.Mutation):
     user = graphene.Field(UserSchema)
     follow_user = graphene.Field(UserSchema)
 
-    @login_required
     def mutate(self, info, user_id, follow_id, follow):
         user = User.objects.get(pk=to_model_id(user_id))
         follow_user = User.objects.get(pk=to_model_id(follow_id))
