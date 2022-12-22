@@ -1,4 +1,5 @@
 from graphene_django.filter import DjangoFilterConnectionField
+from graphene import relay
 
 from .errors import ERR_NOT_LOGIN
 from .mutation import *
@@ -11,15 +12,9 @@ class Query(graphene.ObjectType):
     photos = DjangoFilterConnectionField(PhotoSchema)
     profiles = DjangoFilterConnectionField(ProfileSchema)
 
-    photo = graphene.relay.Node.Field(PhotoSchema)
-    user = graphene.Field(UserSchema, id=graphene.ID(required=True))
-    profile = graphene.Field(ProfileSchema, user_id=graphene.ID(required=True))
-
-    def resolve_user(self, info, id):
-        return User.objects.select_related('profile').get(pk=to_model_id(id))
-
-    def resolve_profile(self, info, user_id):
-        return Profile.objects.select_related('user').get(user_id=to_model_id(user_id))
+    photo = relay.Node.Field(PhotoSchema)
+    user = relay.Node.Field(UserSchema)
+    profile = relay.Node.Field(ProfileSchema)
 
 
 class Mutations(graphene.ObjectType):

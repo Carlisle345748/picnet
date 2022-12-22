@@ -33,6 +33,13 @@ class UserSchema(DjangoObjectType):
         fields = ('username', 'first_name', 'last_name', 'email', 'profile')
         filter_fields = ['id', 'username']
 
+    @classmethod
+    def get_node(cls, info, id):
+        try:
+            return cls._meta.model.objects.select_related('profile').get(id=id)
+        except cls._meta.model.DoesNotExist:
+            return None
+
 
 class CommentSchema(DjangoObjectType):
     class Meta:
