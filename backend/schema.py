@@ -11,6 +11,7 @@ class Query(graphene.ObjectType):
     users = DjangoFilterConnectionField(UserSchema)
     photos = DjangoFilterConnectionField(PhotoSchema)
     profiles = DjangoFilterConnectionField(ProfileSchema)
+    feeds = DjangoFilterConnectionField(FeedSchema)
 
     photo = relay.Node.Field(PhotoSchema)
     user = relay.Node.Field(UserSchema)

@@ -63,3 +63,12 @@ class PhotoSchema(DjangoObjectType):
 
     def resolve_url(self, info):
         return "/media/" + self.file_name
+
+
+class FeedSchema(DjangoObjectType):
+    class Meta:
+        model = Feed
+        interfaces = (graphene.Node,)
+        fields = "__all__"
+        filter_fields = ['user']
+

@@ -25,3 +25,9 @@ class Comment(models.Model):
     date_time = models.DateTimeField(auto_now_add=True)
     photo = models.ForeignKey(Photo, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+class Feed(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    photo = models.ForeignKey(Photo, on_delete=models.CASCADE)
+    date_time = models.DateTimeField(auto_now_add=True)
