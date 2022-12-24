@@ -3,6 +3,7 @@ from graphene_django import DjangoObjectType
 
 from backend.models import *
 from backend.utils import to_model_id
+from django_filters import FilterSet, OrderingFilter
 
 
 class ProfileSchema(DjangoObjectType):
@@ -57,6 +58,8 @@ class PhotoSchema(DjangoObjectType):
 
     url = graphene.String()
     is_like = graphene.Boolean(user_id=graphene.ID(required=True))
+    like_count = graphene.Int()
+    comment_count = graphene.Int()
 
     def resolve_is_like(self, info, user_id):
         return self.user_like.filter(pk=to_model_id(user_id)).exists()
@@ -64,11 +67,24 @@ class PhotoSchema(DjangoObjectType):
     def resolve_url(self, info):
         return "/media/" + self.file_name
 
+    def resolve_like_count(self, info):
+        return self.user_like.count()
+
+    def resolve_comment_count(self, info):
+        return self.comment_set.count()
+
 
 class FeedSchema(DjangoObjectType):
     class Meta:
         model = Feed
         interfaces = (graphene.Node,)
-        fields = "__all__"
-        filter_fields = ['user']
 
+
+class FeedFilter(FilterSet):
+    class Meta:
+        model = Feed
+        fields = ['user']
+
+    order_by = OrderingFilter(
+        fields=('date_time',)
+    )
