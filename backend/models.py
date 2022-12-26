@@ -7,10 +7,14 @@ connect('photo', username='root', password='123456', authentication_source='admi
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    description = models.CharField(max_length=150)
+    description = models.CharField(max_length=200)
     avatar = models.CharField(default="/", max_length=200)
     follower = models.ManyToManyField(User, related_name="follower")
     following = models.ManyToManyField(User, related_name="following")
+
+
+class PhotoTag(models.Model):
+    tag = models.CharField(max_length=100)
 
 
 class Photo(models.Model):
@@ -18,10 +22,13 @@ class Photo(models.Model):
     date_time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_like = models.ManyToManyField(User, related_name="user_like")
+    description = models.CharField(max_length=400, default="")
+    tags = models.ManyToManyField(PhotoTag)
+    location = models.CharField(max_length=200, default="")
 
 
 class Comment(models.Model):
-    comment = models.CharField(default="", max_length=200)
+    comment = models.CharField(default="", max_length=400)
     date_time = models.DateTimeField(auto_now_add=True)
     photo = models.ForeignKey(Photo, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
