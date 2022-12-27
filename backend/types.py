@@ -98,3 +98,8 @@ class FeedFilter(FilterSet):
     order_by = OrderingFilter(
         fields=('date_time',)
     )
+
+
+class HotTag(graphene.ObjectType):
+    tag = graphene.String()
+    count = graphene.Int()

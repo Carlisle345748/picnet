@@ -18,7 +18,7 @@ class Query(graphene.ObjectType):
     user = relay.Node.Field(UserSchema)
     profile = relay.Node.Field(ProfileSchema)
 
-    top_tags = graphene.List(graphene.String,
+    top_tags = graphene.List(HotTag,
                              text=graphene.String(default_value=""),
                              top_n=graphene.Int(default_value=5))
 
@@ -26,8 +26,8 @@ class Query(graphene.ObjectType):
         tags = PhotoTag.objects
         if text != "":
             tags = tags.filter(tag__istartswith=text)
-        tags = tags.annotate(Count('photo')).order_by("-photo__count")[:top_n]
-        return [t.tag for t in tags]
+        tags = tags.annotate(Count('photo')).filter(photo__count__gte=1).order_by("-photo__count")[:top_n]
+        return [HotTag(tag=t.tag, count=t.photo__count) for t in tags]
 
 
 class Mutations(graphene.ObjectType):
