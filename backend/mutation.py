@@ -1,10 +1,12 @@
 from django.contrib.auth import authenticate, login, logout
+from graphene_file_upload.scalars import Upload
 from djongo.database import IntegrityError
+from django.db import transaction
 from graphql import GraphQLError
 
 from backend.errors import ERR_USERNAME_EXIST, ERR_LOGIN
 from backend.types import *
-from backend.utils import to_model_id
+from backend.utils import to_model_id, save_image
 
 
 class ProfileInput(graphene.InputObjectType):
@@ -130,6 +132,49 @@ class Login(graphene.Mutation):
             raise GraphQLError(message="incorrect username or password", extensions=ERR_LOGIN)
         login(info.context, user)
         return Login(user=user)
+
+
+class UploadPhoto(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.ID(required=True)
+        description = graphene.String(required=True)
+        tags = graphene.List(graphene.String, required=True)
+        image = Upload(required=True)
+
+    photo = graphene.Field(PhotoSchema)
+
+    def mutate(self, info, user_id, description, tags, image):
+        with transaction.atomic():
+            filename = save_image(image)
+
+            user = User.objects.get(pk=to_model_id(user_id))
+            photo = Photo(file_name=filename, user=user, description=description)
+            photo.save()
+
+            for tagName in tags:
+                tag, _ = PhotoTag.objects.get_or_create(tag=tagName)
+                photo.tags.add(tag)
+
+            followers = user.profile.follower.all()
+            for follower in followers:
+                feed = Feed(user=follower, photo=photo)
+                feed.save()
+            return UploadPhoto(photo=photo)
+
+
+class UploadAvatar(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.ID(required=True)
+        avatar = Upload(required=True)
+
+    profile = graphene.Field(ProfileSchema)
+
+    def mutate(self, info, user_id, avatar):
+        filename = save_image(avatar)
+        profile = Profile.objects.get(user_id=to_model_id(user_id))
+        profile.avatar = "/media/" + filename
+        profile.save()
+        return UploadAvatar(profile=profile)
 
 
 class Logout(graphene.Mutation):

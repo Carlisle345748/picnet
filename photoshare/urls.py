@@ -20,12 +20,12 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
-from graphene_django.views import GraphQLView
+from graphene_file_upload.django import FileUploadGraphQLView
 
 
 urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + [
     path("admin/", admin.site.urls),
-    path("graphql", GraphQLView.as_view(graphiql=True)),
+    path("graphql",  FileUploadGraphQLView.as_view(graphiql=True)),
     path("", include('backend.urls')),
     re_path(r".*", ensure_csrf_cookie(TemplateView.as_view(template_name="index.html")), name="main"),
 ]

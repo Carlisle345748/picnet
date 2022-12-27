@@ -24,6 +24,9 @@ class Mutations(graphene.ObjectType):
     update_follower = UpdateFollower.Field()
     update_profile = UpdateProfile.Field()
 
+    upload_photo = UploadPhoto.Field()
+    upload_avatar = UploadAvatar.Field()
+
     create_user = CreateUser.Field()
     login = Login.Field()
     logout = Logout.Field()
