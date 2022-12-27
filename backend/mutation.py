@@ -138,17 +138,23 @@ class UploadPhoto(graphene.Mutation):
     class Arguments:
         user_id = graphene.ID(required=True)
         description = graphene.String(required=True)
+        location = graphene.String(required=True)
         tags = graphene.List(graphene.String, required=True)
         image = Upload(required=True)
 
     photo = graphene.Field(PhotoSchema)
 
-    def mutate(self, info, user_id, description, tags, image):
+    def mutate(self, info, user_id, description, location, tags, image):
         with transaction.atomic():
             filename = save_image(image)
 
             user = User.objects.get(pk=to_model_id(user_id))
-            photo = Photo(file_name=filename, user=user, description=description)
+            photo = Photo(
+                file_name=filename,
+                user=user,
+                description=description,
+                location=location
+            )
             photo.save()
 
             for tagName in tags:

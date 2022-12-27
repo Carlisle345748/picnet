@@ -74,6 +74,16 @@ class PhotoSchema(DjangoObjectType):
         return self.comment_set.count()
 
 
+class PhotoFilter(FilterSet):
+    class Meta:
+        model = Photo
+        fields = ['id', 'user']
+
+    order_by = OrderingFilter(
+        fields=('date_time',)
+    )
+
+
 class FeedSchema(DjangoObjectType):
     class Meta:
         model = Feed

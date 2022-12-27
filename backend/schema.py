@@ -9,7 +9,7 @@ WHITE_LIST = ['login', 'logout', 'create_user']
 
 class Query(graphene.ObjectType):
     users = DjangoFilterConnectionField(UserSchema)
-    photos = DjangoFilterConnectionField(PhotoSchema)
+    photos = DjangoFilterConnectionField(PhotoSchema, filterset_class=PhotoFilter)
     profiles = DjangoFilterConnectionField(ProfileSchema)
     feeds = DjangoFilterConnectionField(FeedSchema, filterset_class=FeedFilter)
 
