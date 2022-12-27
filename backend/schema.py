@@ -1,5 +1,6 @@
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene import relay
+from django.db.models import Count
 
 from .errors import ERR_NOT_LOGIN
 from .mutation import *
@@ -16,6 +17,17 @@ class Query(graphene.ObjectType):
     photo = relay.Node.Field(PhotoSchema)
     user = relay.Node.Field(UserSchema)
     profile = relay.Node.Field(ProfileSchema)
+
+    top_tags = graphene.List(graphene.String,
+                             text=graphene.String(default_value=""),
+                             top_n=graphene.Int(default_value=5))
+
+    def resolve_top_tags(self, _, top_n, text):
+        tags = PhotoTag.objects
+        if text != "":
+            tags = tags.filter(tag__istartswith=text)
+        tags = tags.annotate(Count('photo')).order_by("-photo__count")[:top_n]
+        return [t.tag for t in tags]
 
 
 class Mutations(graphene.ObjectType):
