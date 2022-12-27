@@ -4,7 +4,7 @@ from djongo.database import IntegrityError
 from django.db import transaction
 from graphql import GraphQLError
 
-from backend.errors import ERR_USERNAME_EXIST, ERR_LOGIN
+from backend.errors import ERR_USERNAME_EXIST, ERR_LOGIN, ERR_ALREADY_DELETE
 from backend.types import *
 from backend.utils import to_model_id, save_image
 
@@ -181,6 +181,43 @@ class UploadAvatar(graphene.Mutation):
         profile.avatar = "/media/" + filename
         profile.save()
         return UploadAvatar(profile=profile)
+
+
+class DeletePhoto(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.ID(required=True)
+        photo_id = graphene.ID(required=True)
+
+    code = graphene.Int()
+    msg = graphene.String()
+
+    def mutate(self, info, user_id, photo_id):
+        try:
+            photo = Photo.objects.get(pk=to_model_id(photo_id), user_id=to_model_id(user_id))
+            photo.delete()
+            return DeletePhoto(code=0, msg="success")
+        except Photo.DoesNotExist:
+            return DeletePhoto(code=ERR_ALREADY_DELETE['code'], msg=ERR_ALREADY_DELETE['msg'])
+
+
+class DeleteComment(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.ID(required=True)
+        comment_id = graphene.ID(required=True)
+
+    code = graphene.Int()
+    msg = graphene.String()
+
+    def mutate(self, info, user_id, comment_id):
+        try:
+            comment = Comment.objects.get(
+                pk=to_model_id(comment_id),
+                user_id=to_model_id(user_id)
+            )
+            comment.delete()
+            return DeleteComment(code=0, msg="success")
+        except Comment.DoesNotExist:
+            return DeleteComment(code=ERR_ALREADY_DELETE['code'], msg=ERR_ALREADY_DELETE['msg'])
 
 
 class Logout(graphene.Mutation):

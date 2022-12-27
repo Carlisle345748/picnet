@@ -27,6 +27,9 @@ class Mutations(graphene.ObjectType):
     upload_photo = UploadPhoto.Field()
     upload_avatar = UploadAvatar.Field()
 
+    delete_photo = DeletePhoto.Field()
+    delete_comment = DeleteComment.Field()
+
     create_user = CreateUser.Field()
     login = Login.Field()
     logout = Logout.Field()
