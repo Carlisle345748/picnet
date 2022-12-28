@@ -14,7 +14,7 @@ class Profile(models.Model):
 
 
 class PhotoTag(models.Model):
-    tag = models.CharField(max_length=100)
+    tag = models.CharField(max_length=200, unique=True)
 
 
 class Photo(models.Model):
