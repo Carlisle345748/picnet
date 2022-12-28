@@ -2,22 +2,14 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphene import relay
 from django.db.models import Count
 
+from .aws import AWSQuery
 from .errors import ERR_NOT_LOGIN
 from .mutation import *
 
 WHITE_LIST = ['login', 'logout', 'create_user']
 
 
-class Query(graphene.ObjectType):
-    users = DjangoFilterConnectionField(UserSchema)
-    photos = DjangoFilterConnectionField(PhotoSchema, filterset_class=PhotoFilter)
-    profiles = DjangoFilterConnectionField(ProfileSchema)
-    feeds = DjangoFilterConnectionField(FeedSchema, filterset_class=FeedFilter)
-
-    photo = relay.Node.Field(PhotoSchema)
-    user = relay.Node.Field(UserSchema)
-    profile = relay.Node.Field(ProfileSchema)
-
+class HotTagsQuery(graphene.ObjectType):
     top_tags = graphene.List(HotTag,
                              text=graphene.String(default_value=""),
                              top_n=graphene.Int(default_value=5))
@@ -28,6 +20,21 @@ class Query(graphene.ObjectType):
             tags = tags.filter(tag__istartswith=text)
         tags = tags.annotate(Count('photo')).filter(photo__count__gte=1).order_by("-photo__count")[:top_n]
         return [HotTag(tag=t.tag, count=t.photo__count) for t in tags]
+
+
+class DataModelQuery(graphene.ObjectType):
+    users = DjangoFilterConnectionField(UserSchema)
+    photos = DjangoFilterConnectionField(PhotoSchema, filterset_class=PhotoFilter)
+    profiles = DjangoFilterConnectionField(ProfileSchema)
+    feeds = DjangoFilterConnectionField(FeedSchema, filterset_class=FeedFilter)
+
+    photo = relay.Node.Field(PhotoSchema)
+    user = relay.Node.Field(UserSchema)
+    profile = relay.Node.Field(ProfileSchema)
+
+
+class QueryHot(DataModelQuery, HotTagsQuery, AWSQuery, graphene.ObjectType):
+    pass
 
 
 class Mutations(graphene.ObjectType):
@@ -58,4 +65,4 @@ class AuthorizationMiddleware:
         return next(root, info, **args)
 
 
-schema = graphene.Schema(query=Query, mutation=Mutations)
+schema = graphene.Schema(query=QueryHot, mutation=Mutations)
