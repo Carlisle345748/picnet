@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'backend',
     'graphene_django',
+    'django.contrib.postgres'
 ]
 
 MIDDLEWARE = [

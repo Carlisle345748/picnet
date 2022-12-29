@@ -2,7 +2,7 @@ import hashlib
 import secrets
 from typing import List
 
-from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from graphene.relay.node import from_global_id
 from graphene.utils.str_converters import to_snake_case
 from graphene_mongo.utils import get_query_fields as get_fields
@@ -10,6 +10,8 @@ from graphql import GraphQLError, GraphQLResolveInfo
 from mongoengine.base import TopLevelDocumentMetaclass
 
 from backend.errors import ERR_NOT_LOGIN
+
+fs = FileSystemStorage()
 
 
 def hash_password(password: str) -> (str, str):
@@ -50,11 +52,10 @@ def get_query_fields(info: GraphQLResolveInfo, model: TopLevelDocumentMetaclass,
 
 
 def save_image(img) -> str:
-    img_hash = hashlib.md5(img.file.read()).hexdigest()
+    img_hash = hashlib.md5(img.read()).hexdigest()
     suffix = img.name[img.name.rindex(".") + 1:]
     filename = f'{img_hash}.{suffix}'
-
-    with open(f'{settings.MEDIA_ROOT}/{filename}', 'wb') as f:
-        img.file.seek(0)
-        f.write(img.file.read())
+    if not fs.exists(filename):
+        img.seek(0)
+        fs.save(filename, img)
     return filename

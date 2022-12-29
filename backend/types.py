@@ -1,9 +1,10 @@
 import graphene
+from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
+from django_filters import FilterSet, OrderingFilter, CharFilter
 from graphene_django import DjangoObjectType
 
 from backend.models import *
 from backend.utils import to_model_id
-from django_filters import FilterSet, OrderingFilter
 
 
 class ProfileSchema(DjangoObjectType):
@@ -28,6 +29,8 @@ class ProfileSchema(DjangoObjectType):
 
 
 class UserSchema(DjangoObjectType):
+    rank = graphene.Float()
+
     class Meta:
         model = User
         interfaces = (graphene.Node,)
@@ -40,6 +43,23 @@ class UserSchema(DjangoObjectType):
             return cls._meta.model.objects.select_related('profile').get(id=id)
         except cls._meta.model.DoesNotExist:
             return None
+
+    def resolve_rank(self, info):
+        return self.rank if hasattr(self, 'rank') else None
+
+
+class UserFilter(FilterSet):
+    search = CharFilter(method='filter_search')
+    order_by = OrderingFilter(fields=('rank',))
+
+    def filter_search(self, queryset, name, value):
+        query = SearchQuery(value, search_type='phrase')
+        vector = SearchVector('first_name', "last_name", weight='A') + SearchVector('profile__description', weight='B')
+        return queryset.annotate(rank=SearchRank(vector, query)).filter(rank__gt=0).distinct('id', 'rank')
+
+    class Meta:
+        model = User
+        fields = ['id', 'username']
 
 
 class CommentSchema(DjangoObjectType):
@@ -60,6 +80,7 @@ class PhotoSchema(DjangoObjectType):
     is_like = graphene.Boolean(user_id=graphene.ID(required=True))
     like_count = graphene.Int()
     comment_count = graphene.Int()
+    rank = graphene.Float()
 
     def resolve_is_like(self, info, user_id):
         return self.user_like.filter(pk=to_model_id(user_id)).exists()
@@ -73,15 +94,22 @@ class PhotoSchema(DjangoObjectType):
     def resolve_comment_count(self, info):
         return self.comment_set.count()
 
+    def resolve_rank(self, info):
+        return self.rank if hasattr(self, 'rank') else None
+
 
 class PhotoFilter(FilterSet):
+    search = CharFilter(method='filter_search')
+    order_by = OrderingFilter(fields=('date_time', 'rank'))
+
+    def filter_search(self, queryset, name, value):
+        query = SearchQuery(value, search_type='phrase')
+        vector = SearchVector('description', 'tags__tag', weight='A') + SearchVector('comment__comment', weight='B')
+        return queryset.annotate(rank=SearchRank(vector, query)).filter(rank__gt=0).distinct('id', 'rank')
+
     class Meta:
         model = Photo
         fields = ['id', 'user']
-
-    order_by = OrderingFilter(
-        fields=('date_time',)
-    )
 
 
 class FeedSchema(DjangoObjectType):

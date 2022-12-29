@@ -23,7 +23,7 @@ class HotTagsQuery(graphene.ObjectType):
 
 
 class DataModelQuery(graphene.ObjectType):
-    users = DjangoFilterConnectionField(UserSchema)
+    users = DjangoFilterConnectionField(UserSchema, filterset_class=UserFilter)
     photos = DjangoFilterConnectionField(PhotoSchema, filterset_class=PhotoFilter)
     profiles = DjangoFilterConnectionField(ProfileSchema)
     feeds = DjangoFilterConnectionField(FeedSchema, filterset_class=FeedFilter)
@@ -33,7 +33,7 @@ class DataModelQuery(graphene.ObjectType):
     profile = relay.Node.Field(ProfileSchema)
 
 
-class QueryHot(DataModelQuery, HotTagsQuery, AWSQuery, graphene.ObjectType):
+class Query(DataModelQuery, HotTagsQuery, AWSQuery, graphene.ObjectType):
     pass
 
 
@@ -65,4 +65,4 @@ class AuthorizationMiddleware:
         return next(root, info, **args)
 
 
-schema = graphene.Schema(query=QueryHot, mutation=Mutations)
+schema = graphene.Schema(query=Query, mutation=Mutations)
