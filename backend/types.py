@@ -53,9 +53,9 @@ class UserFilter(FilterSet):
     order_by = OrderingFilter(fields=('rank',))
 
     def filter_search(self, queryset, name, value):
-        query = SearchQuery(value, search_type='phrase')
+        query = SearchQuery(value)
         vector = SearchVector('first_name', "last_name", weight='A') + SearchVector('profile__description', weight='B')
-        return queryset.annotate(rank=SearchRank(vector, query)).filter(rank__gt=0).distinct('id', 'rank')
+        return queryset.annotate(rank=SearchRank(vector, query)).filter(rank__gt=0.1).distinct('id', 'rank')
 
     class Meta:
         model = User
@@ -103,9 +103,10 @@ class PhotoFilter(FilterSet):
     order_by = OrderingFilter(fields=('date_time', 'rank'))
 
     def filter_search(self, queryset, name, value):
-        query = SearchQuery(value, search_type='phrase')
-        vector = SearchVector('description', 'tags__tag', weight='A') + SearchVector('comment__comment', weight='B')
-        return queryset.annotate(rank=SearchRank(vector, query)).filter(rank__gt=0).distinct('id', 'rank')
+        query = SearchQuery(value)
+        vector = SearchVector('description', 'location', 'tags__tag', weight='A')
+        vector += SearchVector('comment__comment', weight='B')
+        return queryset.annotate(rank=SearchRank(vector, query)).filter(rank__gt=0.1).distinct('id', 'rank')
 
     class Meta:
         model = Photo
