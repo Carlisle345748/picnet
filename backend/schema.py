@@ -6,7 +6,7 @@ from .aws import AWSQuery
 from .errors import ERR_NOT_LOGIN
 from .mutation import *
 
-WHITE_LIST = ['login', 'logout', 'create_user']
+WHITE_LIST = ['login', 'logout', 'createUser', '__schema']
 
 
 class HotTagsQuery(graphene.ObjectType):

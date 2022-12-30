@@ -1,8 +1,5 @@
 from django.contrib.auth.models import User
 from django.db import models
-from mongoengine import *
-
-connect('photo', username='root', password='123456', authentication_source='admin')
 
 
 class Profile(models.Model):
@@ -18,7 +15,7 @@ class PhotoTag(models.Model):
 
 
 class Photo(models.Model):
-    file_name = models.CharField(max_length=200)
+    file_name = models.ImageField(upload_to="images/")
     date_time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_like = models.ManyToManyField(User, related_name="user_like")

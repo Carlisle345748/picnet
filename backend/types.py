@@ -86,7 +86,7 @@ class PhotoSchema(DjangoObjectType):
         return self.user_like.filter(pk=to_model_id(user_id)).exists()
 
     def resolve_url(self, info):
-        return "/media/" + self.file_name
+        return self.file_name.url
 
     def resolve_like_count(self, info):
         return self.user_like.count()

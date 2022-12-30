@@ -1,7 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from graphene_file_upload.scalars import Upload
-from djongo.database import IntegrityError
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from graphql import GraphQLError
 
 from backend.errors import ERR_USERNAME_EXIST, ERR_LOGIN, ERR_ALREADY_DELETE
