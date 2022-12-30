@@ -5,7 +5,7 @@ from django.db import models
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     description = models.CharField(max_length=200)
-    avatar = models.CharField(default="/", max_length=200)
+    avatar = models.ImageField(upload_to="avatar/")
     follower = models.ManyToManyField(User, related_name="follower")
     following = models.ManyToManyField(User, related_name="following")
 

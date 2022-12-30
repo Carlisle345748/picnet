@@ -14,9 +14,13 @@ class ProfileSchema(DjangoObjectType):
         fields = "__all__"
         filter_fields = ['user']
 
+    avatar = graphene.String()
     follower_count = graphene.Int()
     following_count = graphene.Int()
     is_following = graphene.Boolean(user_id=graphene.ID(required=True))
+
+    def resolve_avatar(self, info):
+        return self.avatar.url
 
     def resolve_follower_count(self, info):
         return self.follower.count()

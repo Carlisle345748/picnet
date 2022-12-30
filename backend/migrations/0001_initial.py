@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('description', models.CharField(max_length=200)),
-                ('avatar', models.CharField(default='/', max_length=200)),
+                ('avatar', models.ImageField(upload_to="avatar/")),
                 ('follower', models.ManyToManyField(related_name='follower', to=settings.AUTH_USER_MODEL)),
                 ('following', models.ManyToManyField(related_name='following', to=settings.AUTH_USER_MODEL)),
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),

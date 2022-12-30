@@ -1,5 +1,5 @@
 aniso8601==9.0.1
-asgiref @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_edg6nzjrx0/croots/recipe/asgiref_1661287549316/work
+asgiref==3.6.0
 attrs==22.2.0
 autopep8==2.0.0
 bcrypt==4.0.1
@@ -9,7 +9,7 @@ botocore==1.23.54
 cached-property==1.5.2
 cachetools==5.2.0
 cement==2.8.2
-certifi @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_0ek9yztvu3/croot/certifi_1665076692562/work/certifi
+certifi==2022.12.7
 cffi==1.15.1
 charset-normalizer==2.0.12
 colorama==0.4.3

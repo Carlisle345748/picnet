@@ -145,11 +145,9 @@ class UploadPhoto(graphene.Mutation):
 
     def mutate(self, info, user_id, description, location, tags, image):
         with transaction.atomic():
-            filename = save_image(image)
-
             user = User.objects.get(pk=to_model_id(user_id))
             photo = Photo(
-                file_name=filename,
+                file_name=image,
                 user=user,
                 description=description,
                 location=location
@@ -175,9 +173,8 @@ class UploadAvatar(graphene.Mutation):
     profile = graphene.Field(ProfileSchema)
 
     def mutate(self, info, user_id, avatar):
-        filename = save_image(avatar)
         profile = Profile.objects.get(user_id=to_model_id(user_id))
-        profile.avatar = "/media/" + filename
+        profile.avatar = avatar
         profile.save()
         return UploadAvatar(profile=profile)
 

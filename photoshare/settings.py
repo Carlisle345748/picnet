@@ -29,6 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
+    'photoshare-env.eba-28tgs4ug.us-west-2.elasticbeanstalk.com'
 ]
 
 
