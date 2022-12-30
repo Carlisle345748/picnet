@@ -137,7 +137,7 @@ STATIC_URL = "static/"
 STATIC_ROOT = "static/"
 
 STATICFILES_DIRS = [
-    "frontend/build/static",
+    "../frontend/build/static",
 ]
 
 # Default primary key field type
