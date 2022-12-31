@@ -1,18 +1,23 @@
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene import relay
 from django.db.models import Count
+from django.core.files.storage import default_storage
 
 from .aws import AWSQuery
 from .errors import ERR_NOT_LOGIN
 from .mutation import *
 
-WHITE_LIST = ['login', 'logout', 'createUser', '__schema']
+WHITE_LIST = ['login', 'logout', 'createUser', '__schema', 'backgroundImage']
 
 
-class HotTagsQuery(graphene.ObjectType):
+class CostumeQuery(graphene.ObjectType):
     top_tags = graphene.List(HotTag,
                              text=graphene.String(default_value=""),
                              top_n=graphene.Int(default_value=5))
+    background_image = graphene.String()
+
+    def resolve_background_image(self, info):
+        return default_storage.url('background.png')
 
     def resolve_top_tags(self, _, top_n, text):
         tags = PhotoTag.objects
@@ -33,7 +38,7 @@ class DataModelQuery(graphene.ObjectType):
     profile = relay.Node.Field(ProfileSchema)
 
 
-class Query(DataModelQuery, HotTagsQuery, AWSQuery, graphene.ObjectType):
+class Query(DataModelQuery, CostumeQuery, AWSQuery, graphene.ObjectType):
     pass
 
 
