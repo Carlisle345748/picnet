@@ -17,21 +17,20 @@ RUN_SERVER_PORT = 8000
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#8j@swzfo((go@@)31+cr^z97ljrvyplx2(7b2oe-u#=6&cc_$'
+SECRET_KEY = os.environ['SECRET_KEY'] if 'SECRET_KEY' in os.environ \
+    else 'django-insecure-#8j@swzfo((go@@)31+cr^z97ljrvyplx2(7b2oe-u#=6&cc_$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ['DEBUG'] if "DEBUG" in os.environ else False
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'photoshare-env.eba-28tgs4ug.us-west-2.elasticbeanstalk.com'
 ]
-
 
 # Application definition
 
@@ -83,7 +82,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'photoshare.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
@@ -110,7 +108,6 @@ else:
         }
     }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -129,7 +126,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -143,13 +139,14 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = "http://photo-share-app-storage.s3-website.us-west-2.amazonaws.com/static/"
+STATIC_URL = "static/"
 
 STATIC_ROOT = "static/"
+
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
 
 STATICFILES_DIRS = [
     "../frontend/build/static",
@@ -164,6 +161,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = "media/"
 
 MEDIA_ROOT = "media/"
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 LOGGING = {
     'version': 1,
@@ -186,3 +185,9 @@ LOGGING = {
     #     }
     # }
 }
+
+AWS_STORAGE_BUCKET_NAME = "photo-share-app-storage"
+
+AWS_S3_REGION_NAME = 'us-west-2'
+
+AWS_LOCATION = 'static/'
