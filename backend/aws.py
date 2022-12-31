@@ -1,17 +1,12 @@
 import boto3
 from cachetools import cached, TTLCache
 from graphene import String, List, ObjectType, Int
-
-cognito_client = boto3.client('cognito-identity', region_name="us-west-2")
-credential = cognito_client.get_credentials_for_identity(
-    IdentityId='us-west-2:00a9c5a6-1b98-432c-a718-482c41436bf6'
-)
+from django.conf import settings
 
 location_client = boto3.client('location',
                                region_name="us-west-2",
-                               aws_access_key_id=credential['Credentials']['AccessKeyId'],
-                               aws_secret_access_key=credential['Credentials']['SecretKey'],
-                               aws_session_token=credential['Credentials']['SessionToken'])
+                               aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                               aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
 
 
 class Location(ObjectType):
