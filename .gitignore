@@ -4,6 +4,8 @@
 **/__pycache__
 /.idea/
 
+docker-compose.yaml
+
 .DS_Store
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
