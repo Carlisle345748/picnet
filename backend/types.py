@@ -20,7 +20,7 @@ class ProfileSchema(DjangoObjectType):
     is_following = graphene.Boolean(user_id=graphene.ID(required=True))
 
     def resolve_avatar(self, info):
-        return self.avatar.url if self.avatar.name != "" else "/"
+        return self.avatar.url if self.avatar.name != "" else ""
 
     def resolve_follower_count(self, info):
         return self.follower.count()
