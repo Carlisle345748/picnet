@@ -29,7 +29,7 @@ DEBUG = os.environ['DEBUG'] == "True" if "DEBUG" in os.environ else True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
-    'photoshare-env.eba-28tgs4ug.us-west-2.elasticbeanstalk.com'
+    'photoshare-dev.us-west-2.elasticbeanstalk.com'
 ]
 
 # Application definition
