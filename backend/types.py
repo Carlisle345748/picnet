@@ -85,6 +85,10 @@ class PhotoSchema(DjangoObjectType):
     like_count = graphene.Int()
     comment_count = graphene.Int()
     rank = graphene.Float()
+    ratio = graphene.Float()
+
+    def resolve_ratio(self, info):
+        return self.ratio if self.ratio != -1 else self.file_name.height / self.file_name.width
 
     def resolve_is_like(self, info, user_id):
         return self.user_like.filter(pk=to_model_id(user_id)).exists()

@@ -1,11 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
-from graphene_file_upload.scalars import Upload
 from django.db import transaction, IntegrityError
+from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
 from backend.errors import ERR_USERNAME_EXIST, ERR_LOGIN, ERR_ALREADY_DELETE
 from backend.types import *
-from backend.utils import to_model_id, save_image
+from backend.utils import to_model_id
 
 
 class ProfileInput(graphene.InputObjectType):
@@ -140,14 +140,16 @@ class UploadPhoto(graphene.Mutation):
         location = graphene.String(required=True)
         tags = graphene.List(graphene.String, required=True)
         image = Upload(required=True)
+        ratio = graphene.Float(required=True)
 
     photo = graphene.Field(PhotoSchema)
 
-    def mutate(self, info, user_id, description, location, tags, image):
+    def mutate(self, info, user_id, description, location, tags, image, ratio):
         with transaction.atomic():
             user = User.objects.get(pk=to_model_id(user_id))
             photo = Photo(
                 file_name=image,
+                ratio=ratio,
                 user=user,
                 description=description,
                 location=location

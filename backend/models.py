@@ -16,6 +16,7 @@ class PhotoTag(models.Model):
 
 class Photo(models.Model):
     file_name = models.ImageField(upload_to="images/")
+    ratio = models.FloatField(default=-1)
     date_time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_like = models.ManyToManyField(User, related_name="user_like")
