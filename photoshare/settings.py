@@ -149,7 +149,7 @@ STATIC_ROOT = "static/"
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
 
 STATICFILES_DIRS = [
-    "../frontend/build/static",
+    "frontend/build/static",
 ]
 
 # Default primary key field type
