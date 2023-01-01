@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'backend',
     'graphene_django',
-    'django.contrib.postgres'
+    'django.contrib.postgres',
+    'ebhealthcheck.apps.EBHealthCheckConfig'
 ]
 
 MIDDLEWARE = [
