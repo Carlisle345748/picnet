@@ -194,6 +194,8 @@ AWS_SECRET_ACCESS_KEY = os.environ['AWS_PHOTO_SHARE_SECRET_ACCESS_KEY']
 
 AWS_STORAGE_BUCKET_NAME = "photo-share-app-storage"
 
+AWS_S3_CUSTOM_DOMAIN = 'd1mwzc9v8ocr0h.cloudfront.net'
+
 AWS_S3_REGION_NAME = 'us-west-2'
 
 AWS_LOCATION = 'static/'
