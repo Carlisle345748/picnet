@@ -12,7 +12,7 @@ class Command(BaseCommand):
         subprocess.run(['npm', 'run', 'build'], cwd='frontend')
         subprocess.run(['python', 'manage.py', 'collectstatic', '--clear', '--noinput', '--verbosity', '2'])
 
-        index_file = open("template/index.html", 'r+')
+        index_file = open("backend/templates/backend/index.html", 'r+')
         index = index_file.read()
 
         for file in listdir('frontend/build/static/js'):
