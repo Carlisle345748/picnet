@@ -69,7 +69,6 @@ ROOT_URLCONF = 'photoshare.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["template"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -199,3 +198,10 @@ AWS_S3_CUSTOM_DOMAIN = 'd1mwzc9v8ocr0h.cloudfront.net'
 AWS_S3_REGION_NAME = 'us-west-2'
 
 AWS_LOCATION = 'static/'
+
+ALGOLIA = {
+    'APPLICATION_ID': 'NMYFCY5PSI',
+    'API_KEY': 'f57c3c6a18b6ed36ace2fc4d3865e4cc',
+    'INDEX_PREFIX': "photo_share",
+    'INDEX_SUFFIX': "test"
+}
