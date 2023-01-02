@@ -2,6 +2,7 @@ from os import listdir
 import re
 import subprocess
 
+subprocess.run(['npm', 'run', 'build'], cwd='frontend')
 subprocess.run(['python', 'manage.py', 'collectstatic', '--clear', '--noinput'])
 
 index_file = open("template/index.html", 'r+')
