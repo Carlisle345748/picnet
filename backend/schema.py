@@ -1,6 +1,5 @@
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene import relay
-from django.db.models import Count
 from django.core.files.storage import default_storage
 
 from .aws import AWSQuery

@@ -1,6 +1,7 @@
 import graphene
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
-from django_filters import FilterSet, OrderingFilter, CharFilter
+from django.db.models import Count, Q
+from django_filters import FilterSet, OrderingFilter, CharFilter, BaseInFilter
 from graphene_django import DjangoObjectType
 
 from backend.models import *
@@ -17,7 +18,7 @@ class ProfileSchema(DjangoObjectType):
     avatar = graphene.String()
     follower_count = graphene.Int()
     following_count = graphene.Int()
-    is_following = graphene.Boolean(user_id=graphene.ID(required=True))
+    is_following = graphene.Boolean(user_id=graphene.ID(default_value=""))
 
     def resolve_avatar(self, info):
         return self.avatar.url if self.avatar.name != "" else ""
@@ -29,7 +30,10 @@ class ProfileSchema(DjangoObjectType):
         return self.following.count()
 
     def resolve_is_following(self, info, user_id):
-        return self.follower.filter(pk=to_model_id(user_id)).exists()
+        if hasattr(self.user, 'is_following'):
+            return self.user.is_following
+        user_id = to_model_id(user_id) if user_id != "" else info.context.user.id
+        return self.follower.filter(pk=user_id).exists()
 
 
 class UserSchema(DjangoObjectType):
@@ -48,18 +52,37 @@ class UserSchema(DjangoObjectType):
         except cls._meta.model.DoesNotExist:
             return None
 
+    @classmethod
+    def get_queryset(cls, queryset, info):
+        return queryset.select_related("profile")
+
     def resolve_rank(self, info):
         return self.rank if hasattr(self, 'rank') else None
 
 
+class StringInFilter(BaseInFilter, CharFilter):
+    pass
+
+
 class UserFilter(FilterSet):
+    is_following = CharFilter(field_name="profile__follower", method="add_is_following")
     search = CharFilter(method='filter_search')
     order_by = OrderingFilter(fields=('rank',))
+    id_in = StringInFilter(field_name="id", lookup_expr="in", method="filter_id_in")
 
     def filter_search(self, queryset, name, value):
         query = SearchQuery(value)
         vector = SearchVector('first_name', "last_name", weight='A') + SearchVector('profile__description', weight='B')
         return queryset.annotate(rank=SearchRank(vector, query)).filter(rank__gt=0.1).distinct('id', 'rank')
+
+    def add_is_following(self, queryset, name, value):
+        user_id = int(to_model_id(value))
+        return queryset.annotate(is_following=Count('profile__follower', filter=Q(profile__follower=user_id)))
+
+    def filter_id_in(self, queryset, name, value):
+        User.objects.filter()
+        ids = [to_model_id(v) for v in value]
+        return queryset.filter(id__in=ids)
 
     class Meta:
         model = User
