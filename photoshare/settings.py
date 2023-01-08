@@ -201,8 +201,8 @@ AWS_S3_REGION_NAME = 'us-west-2'
 AWS_LOCATION = 'static/'
 
 ALGOLIA = {
-    'APPLICATION_ID': 'NMYFCY5PSI',
-    'API_KEY': 'f57c3c6a18b6ed36ace2fc4d3865e4cc',
+    'APPLICATION_ID': os.environ["ALGOLIA_APPLICATION_ID"],
+    'API_KEY': os.environ["ALGOLIA_API_KEY"],
     'INDEX_PREFIX': "photo_share",
-    'INDEX_SUFFIX': "test"
+    'INDEX_SUFFIX': "dev" if DEBUG else "prod"
 }
