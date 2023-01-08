@@ -7,12 +7,20 @@ from backend.models import Profile, Photo
 @register(Profile)
 class UserModelIndex(AlgoliaIndex):
     fields = ('global_id', 'username', 'name', 'description', 'avatar_url')
-    settings = {'searchableAttributes': ['username', 'name', 'description']}
+    settings = {'searchableAttributes': ['username', 'name', 'unordered(description)']}
     index_name = 'user'
 
 
 @register(Photo)
 class PhotoModelIndex(AlgoliaIndex):
     fields = ("global_id", "file_name", "url", "description", "location", "photo_tags", "photo_comments")
-    settings = {'searchableAttributes': ['description', 'location"', 'photo_tags', 'photo_comments']}
+    settings = {
+        'searchableAttributes': [
+            'unordered(description)',
+            'unordered(location)',
+            'unordered(photo_tags)',
+            'unordered(photo_comments)'
+        ],
+        'removeStopWords': ['en', 'zh']
+    }
     index_name = 'photo'

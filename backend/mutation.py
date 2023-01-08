@@ -2,6 +2,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import transaction, IntegrityError
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
+from algoliasearch_django import save_record, get_adapter
+from algoliasearch_django.decorators import disable_auto_indexing
 
 from backend.errors import ERR_USERNAME_EXIST, ERR_LOGIN, ERR_ALREADY_DELETE
 from backend.types import *
@@ -26,8 +28,8 @@ class UpdateProfile(graphene.Mutation):
         user.first_name = profile_data.first_name
         user.last_name = profile_data.last_name
         user.profile.description = profile_data.description
-        user.save()
         user.profile.save()
+        user.save()
         return UpdateProfile(user=user)
 
 
@@ -46,6 +48,17 @@ class CreateComment(graphene.Mutation):
             photo=Photo.objects.get(pk=to_model_id(photo_id))
         )
         new_comment.save()
+
+        photo_adapter = get_adapter(Photo)
+        index = getattr(photo_adapter, "_AlgoliaIndex__index")
+        index.partial_update_object({
+            'photo_comments': {
+                '_operation': 'Add',
+                'value': comment
+            },
+            'objectID': to_model_id(photo_id)
+        })
+
         return CreateComment(comment=new_comment)
 
 
@@ -145,7 +158,7 @@ class UploadPhoto(graphene.Mutation):
     photo = graphene.Field(PhotoSchema)
 
     def mutate(self, info, user_id, description, location, tags, image, ratio):
-        with transaction.atomic():
+        with transaction.atomic(), disable_auto_indexing():
             user = User.objects.get(pk=to_model_id(user_id))
             photo = Photo(
                 file_name=image,
@@ -160,10 +173,12 @@ class UploadPhoto(graphene.Mutation):
                 tag, _ = PhotoTag.objects.get_or_create(tag=tagName)
                 photo.tags.add(tag)
 
+            save_record(photo)
+
             followers = user.profile.follower.all()
-            for follower in followers:
-                feed = Feed(user=follower, photo=photo)
-                feed.save()
+            feeds = [Feed(user=follower, photo=photo) for follower in followers]
+            Feed.objects.bulk_create(feeds)
+
             return UploadPhoto(photo=photo)
 
 
@@ -213,6 +228,14 @@ class DeleteComment(graphene.Mutation):
                 user_id=to_model_id(user_id)
             )
             comment.delete()
+
+            photo_adapter = get_adapter(Photo)
+            index = getattr(photo_adapter, "_AlgoliaIndex__index")
+            index.partial_update_object({
+                'photo_comments': comment.photo.photo_comments(),
+                'objectID': comment.photo.id,
+            })
+
             return DeleteComment(code=0, msg="success")
         except Comment.DoesNotExist:
             return DeleteComment(code=ERR_ALREADY_DELETE['code'], msg=ERR_ALREADY_DELETE['msg'])
