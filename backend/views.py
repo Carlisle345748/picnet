@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 from django.db import transaction
+from django.conf import settings
 
 from .errors import *
 from .models import Photo, Feed
@@ -56,3 +57,8 @@ def login(request: Request):
 def logout(request: Request):
     auth_logout(request)
     return Response({"code": 0, "msg": "success"})
+
+
+@api_view(["GET"])
+def get_setting(request: Request):
+    return Response({"Debug": settings.DEBUG, "Alogia": settings.ALGOLIA['INDEX_SUFFIX']})
