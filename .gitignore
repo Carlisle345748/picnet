@@ -3,6 +3,7 @@
 /frontend/
 **/__pycache__
 /.idea/
+fake
 
 docker-compose.yaml
 
