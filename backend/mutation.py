@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import transaction, IntegrityError
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
-from algoliasearch_django import save_record, get_adapter
+from algoliasearch_django import save_record, get_adapter, AlgoliaIndex
 from algoliasearch_django.decorators import disable_auto_indexing
 
 from backend.errors import ERR_USERNAME_EXIST, ERR_LOGIN, ERR_ALREADY_DELETE
@@ -42,22 +42,19 @@ class CreateComment(graphene.Mutation):
     comment = graphene.Field(CommentSchema)
 
     def mutate(self, info, user_id, photo_id, comment):
+        qs = Photo.objects.filter(pk=to_model_id(photo_id))
         new_comment = Comment(
             comment=comment,
             user=User.objects.get(pk=to_model_id(user_id)),
-            photo=Photo.objects.get(pk=to_model_id(photo_id))
+            photo=qs[0]
         )
         new_comment.save()
 
-        photo_adapter = get_adapter(Photo)
-        index = getattr(photo_adapter, "_AlgoliaIndex__index")
-        index.partial_update_object({
-            'photo_comments': {
-                '_operation': 'Add',
-                'value': comment
-            },
-            'objectID': to_model_id(photo_id)
-        })
+        photo_index: AlgoliaIndex = get_adapter(Photo)
+        photo_index.update_records(
+            qs=qs,
+            photo_comments={'_operation': 'Add', 'value': comment}
+        )
 
         return CreateComment(comment=new_comment)
 
@@ -229,12 +226,9 @@ class DeleteComment(graphene.Mutation):
             )
             comment.delete()
 
-            photo_adapter = get_adapter(Photo)
-            index = getattr(photo_adapter, "_AlgoliaIndex__index")
-            index.partial_update_object({
-                'photo_comments': comment.photo.photo_comments(),
-                'objectID': comment.photo.id,
-            })
+            qs = Photo.objects.filter(pk=comment.photo_id)
+            photo_index: AlgoliaIndex = get_adapter(Photo)
+            photo_index.update_records(qs, photo_comments=qs[0].photo_comments())
 
             return DeleteComment(code=0, msg="success")
         except Comment.DoesNotExist:
