@@ -37,6 +37,12 @@ class Photo(models.Model):
     tags = models.ManyToManyField(PhotoTag)
     location = models.CharField(max_length=200, default="")
 
+    def user_fullname(self):
+        return self.user.first_name + " " + self.user.last_name
+
+    def username(self):
+        return self.user.username
+
     def global_id(self):
         return to_global_id("PhotoSchema", self.id)
 

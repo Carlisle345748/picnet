@@ -13,12 +13,15 @@ class UserModelIndex(AlgoliaIndex):
 
 @register(Photo)
 class PhotoModelIndex(AlgoliaIndex):
-    fields = ("global_id", "file_name", "url", "description", "location", "photo_tags", "photo_comments")
+    fields = ("global_id", "file_name", "url", "description", "location",
+              "photo_tags", "photo_comments", "user_fullname", "username")
     settings = {
         'searchableAttributes': [
             'unordered(description)',
             'unordered(location)',
             'unordered(photo_tags)',
+            'user_fullname',
+            'username',
             'unordered(photo_comments)'
         ],
         'removeStopWords': ['en', 'zh']
