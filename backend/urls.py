@@ -4,7 +4,7 @@ from django.conf import settings
 from django.views.generic import TemplateView
 from strawberry.django.views import AsyncGraphQLView
 
-from backend.types2 import schema
+from backend.schema2 import schema
 
 app_name = 'backend'
 

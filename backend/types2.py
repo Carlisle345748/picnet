@@ -1,14 +1,11 @@
 from abc import ABC
-from typing import cast, Type, Optional
+from typing import cast, Type
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Prefetch
-from strawberry_django import auth
 from strawberry_django_plus import gql
-from strawberry_django_plus.directives import SchemaDirectiveExtension
 from strawberry_django_plus.gql import relay
-from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 
 from . import models
 from .directive import IsAuthenticated
@@ -117,33 +114,13 @@ class FeedType(relay.Node, ABC):
 
 
 @gql.type
-class Query:
-    user: Optional[UserType] = gql.django.node(directives=[IsAuthenticated()])
-
-    users: relay.Connection[UserType] = gql.django.connection(directives=[IsAuthenticated()])
-
-    profile: Optional[relay.Node] = gql.django.node()
-
-    profiles: relay.Connection[ProfileType] = gql.django.connection()
-
-    photo: Optional[PhotoType] = gql.django.node()
-
-    photos: relay.Connection[PhotoType] = gql.django.connection()
-
-    feeds: relay.Connection[FeedType] = gql.django.connection()
+class HotTag:
+    tag: str
+    count: int
 
 
 @gql.type
-class Mutation:
-    login: UserType = auth.login()
-    logout = auth.logout()
-
-
-schema = gql.Schema(
-    query=Query,
-    mutation=Mutation,
-    extensions=[
-        SchemaDirectiveExtension,
-        DjangoOptimizerExtension,
-    ],
-)
+class Location:
+    full_address: str
+    main: str
+    secondary: str
