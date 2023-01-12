@@ -7,30 +7,20 @@ from django.db import transaction
 from strawberry.types import Info
 from strawberry_django import auth
 from strawberry_django_plus import gql, relay
+from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.relay import GlobalID
 
-from . import models
+from .directive import IsAuthenticated
 from .models import Profile, Photo, Comment
 from .types2 import UserType, CommentType, PhotoType
 
 UserModel = cast(Type[User], get_user_model())
 
 
-@gql.django.partial(UserModel)
-class UserPartialInput(gql.NodeInputPartial):
-    first_name: gql.auto
-    last_name: gql.auto
-    profile: "ProfileInput"
-
-
-@gql.django.partial(models.Profile)
-class ProfileInput:
-    description: gql.auto
-
-
-@gql.django.partial(models.Photo)
-class PhotoUserLikeInput(gql.NodeInputPartial):
-    user_like: gql.auto
+@gql.type
+class UpdateFollowerResult:
+    user: UserType
+    follow_user: UserType
 
 
 # noinspection PyShadowingBuiltins
@@ -40,7 +30,7 @@ class Mutation:
 
     logout = auth.logout()
 
-    @relay.input_mutation
+    @relay.input_mutation(directives=[IsAuthenticated()])
     @transaction.atomic
     def create_user(
             self,
@@ -62,6 +52,7 @@ class Mutation:
         return cast(UserType, user)
 
     @relay.input_mutation
+    @transaction.atomic
     def create_comment(self, info: Info, photo_id: GlobalID, comment: str) -> CommentType:
         new_comment = Comment.objects.create(
             comment=comment,
@@ -87,13 +78,39 @@ class Mutation:
         return cast(UserType, user)
 
     @relay.input_mutation
+    @transaction.atomic
     def update_photo_like(self, info: Info, photo_id: GlobalID, like: bool) -> PhotoType:
         user = info.context.request.user
-        photo = photo_id.resolve_node(info, ensure_type=Photo)
+        photo = Photo.objects.get(pk=photo_id.node_id)
         if like:
             photo.user_like.add(user)
-            photo.like_by_me = [user]
         else:
             photo.user_like.remove(user)
-            photo.like_by_me = []
         return cast(PhotoType, photo)
+
+    @relay.input_mutation
+    @transaction.atomic
+    def update_follower(self, info: Info, user_id: GlobalID, follow: bool) -> UpdateFollowerResult:
+        logged_in_user: User = info.context.request.user
+        follow_user: User = UserModel.objects.get(pk=user_id.node_id)
+        if follow:
+            logged_in_user.profile.following.add(follow_user)
+            follow_user.profile.follower.add(logged_in_user)
+        else:
+            logged_in_user.profile.following.remove(follow_user)
+            follow_user.profile.follower.remove(logged_in_user)
+        return UpdateFollowerResult(user=logged_in_user, follow_user=follow_user)
+
+    @relay.input_mutation
+    def delete_photo(self, info: Info, id: GlobalID) -> PhotoType:
+        photo = Photo.objects.get(pk=id.node_id)
+        return cast(PhotoType, resolvers.delete(info, photo))
+
+    @relay.input_mutation
+    def delete_comment(self, info: Info, id: GlobalID) -> CommentType:
+        comment = Comment.objects.get(pk=id.node_id)
+        comment = resolvers.delete(info, comment)
+
+        qs = Photo.objects.filter(pk=comment.photo_id)
+        update_records(model=Photo, qs=qs, photo_comments=qs[0].photo_comments())
+        return cast(CommentType, comment)
