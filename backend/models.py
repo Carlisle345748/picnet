@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Prefetch
 from graphql_relay import to_global_id
+from strawberry_django_plus import gql
 
 
 class Profile(models.Model):

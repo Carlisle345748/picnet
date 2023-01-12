@@ -47,7 +47,9 @@ INSTALLED_APPS = [
     'graphene_django',
     'django.contrib.postgres',
     'ebhealthcheck.apps.EBHealthCheckConfig',
-    'algoliasearch_django'
+    'algoliasearch_django',
+    'strawberry.django',
+    'strawberry_django_plus'
 ]
 
 MIDDLEWARE = [

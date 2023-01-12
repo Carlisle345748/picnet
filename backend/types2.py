@@ -4,6 +4,7 @@ from typing import cast, Type
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Prefetch
+from strawberry.types import Info
 from strawberry_django_plus import gql
 from strawberry_django_plus.gql import relay
 
@@ -19,7 +20,7 @@ class UserFilter:
     username: gql.auto
 
 
-@gql.django.type(UserModel, filters=UserFilter)
+@gql.django.type(UserModel, filters=UserFilter, select_related="profile")
 class UserType(relay.Node, ABC):
     username: gql.auto
     first_name: gql.auto
@@ -47,7 +48,9 @@ class ProfileType(relay.Node, ABC):
             to_attr="followed_by_me"
         )
     ])
-    def is_following(self) -> bool:
+    def is_following(self, info: Info, root: models.Profile) -> bool:
+        if not hasattr(self, "followed_by_me"):
+            return root.follower.filter(pk=info.context.request.user.id).exists()
         return len(self.followed_by_me) > 0
 
 
@@ -81,11 +84,13 @@ class PhotoType(relay.Node, ABC):
         prefetch_related=[
             lambda info: Prefetch(
                 "user_like",
-                queryset=UserModel.objects.filter(info.context.request.user.id),
+                queryset=UserModel.objects.filter(pk=info.context.request.user.id),
                 to_attr="like_by_me")
         ]
     )
-    def is_like(self) -> bool:
+    def is_like(self, info: Info, root: models.Photo) -> bool:
+        if not hasattr(self, "like_by_me"):
+            return root.user_like.filter(pk=info.context.request.user.id).exists()
         return len(self.like_by_me) > 0
 
     @gql.django.field(only=["file_name", "ratio"])
@@ -96,7 +101,7 @@ class PhotoType(relay.Node, ABC):
 @gql.django.type(models.Comment, directives=[IsAuthenticated()])
 class CommentType(relay.Node, ABC):
     comment: gql.auto
-    date_time = gql.auto
+    date_time: gql.auto
     photo: "PhotoType"
     user: "UserType"
 

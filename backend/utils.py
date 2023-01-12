@@ -4,6 +4,7 @@ import secrets
 from django.core.files.storage import FileSystemStorage
 from graphene.relay.node import from_global_id
 from graphql import GraphQLError
+from strawberry_django_plus import relay
 
 from backend.errors import ERR_NOT_LOGIN
 
@@ -32,7 +33,7 @@ def login_required(func):
 
 
 def to_model_id(global_id: str) -> str:
-    return from_global_id(global_id).id
+    return relay.from_base64(global_id)[1]
 
 
 def save_image(img) -> str:

@@ -2,13 +2,13 @@ from django.urls import path, re_path
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.conf import settings
 from django.views.generic import TemplateView
-from strawberry.django.views import AsyncGraphQLView
+from strawberry.django.views import GraphQLView
 
 from backend.schema2 import schema
 
 app_name = 'backend'
 
-graphql_view = AsyncGraphQLView.as_view(schema=schema)
+graphql_view = GraphQLView.as_view(schema=schema)
 
 urlpatterns = [
     path("graphql", csrf_exempt(graphql_view) if settings.DEBUG else graphql_view),
