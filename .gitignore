@@ -1,6 +1,5 @@
 /static/
 /media/
-/frontend/
 **/__pycache__
 /.idea/
 fake
