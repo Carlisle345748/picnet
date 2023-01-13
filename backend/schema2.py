@@ -19,7 +19,7 @@ class CostumeQuery:
     def background_image(self) -> str:
         return default_storage.url('background.png')
 
-    @gql.field()
+    @gql.field(directives=[IsAuthenticated()])
     def top_tags(self, top_n: Optional[int] = 5, text: Optional[str] = UNSET) -> List[HotTag]:
         tags = PhotoTag.objects
         if text is not UNSET:

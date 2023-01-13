@@ -5,6 +5,7 @@ from cachetools import cached, TTLCache
 from django.conf import settings
 from strawberry_django_plus import gql
 
+from backend.directive import IsAuthenticated
 from backend.types2 import Location
 
 location_client = boto3.client(
@@ -35,7 +36,7 @@ def parse_address(address: str) -> Location:
 @gql.type
 class AWSQuery:
 
-    @gql.field
+    @gql.field(directives=[IsAuthenticated()])
     def location_suggestions(self, text: str, top_n: Optional[int] = 5) -> List[Location]:
         addresses = get_suggestion(text, top_n)
         return [parse_address(a) for a in addresses]
