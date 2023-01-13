@@ -13,7 +13,7 @@ class UserModelIndex(AlgoliaIndex):
 
 @register(Photo)
 class PhotoModelIndex(AlgoliaIndex):
-    fields = ("global_id", "file_name", "url", "description", "location",
+    fields = ("global_id", "file", "url", "description", "location",
               "photo_tags", "photo_comments", "user_fullname", "username")
     settings = {
         'searchableAttributes': [

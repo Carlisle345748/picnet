@@ -2,7 +2,7 @@ from typing import Optional, cast, Type, List
 
 from algoliasearch_django import update_records, save_record
 from algoliasearch_django.decorators import disable_auto_indexing
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.contrib.auth.models import User
 from django.db import transaction, IntegrityError
 from graphql import GraphQLError
@@ -13,7 +13,7 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.mutations import resolvers
 from strawberry_django_plus.relay import GlobalID
 
-from .errors import ERR_USERNAME_EXIST
+from .errors import ERR_USERNAME_EXIST, ERR_LOGIN
 from .models import Profile, Photo, Comment, PhotoTag, Feed
 from .types2 import UserType, CommentType, PhotoType, ProfileType
 
@@ -29,9 +29,17 @@ class UpdateFollowerResult:
 # noinspection PyShadowingBuiltins
 @gql.type
 class Mutation:
-    login: Optional[UserType] = auth.login()
-
     logout = auth.logout()
+
+    @gql.django.mutation(handle_django_errors=False)
+    def login(self, info: Info, username: str, password: str) -> UserType:
+        request = info.context.request
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            logout(request)
+            raise GraphQLError(message="incorrect username or password", extensions=ERR_LOGIN)
+        login(request, user)
+        return cast(UserType, user)
 
     @gql.django.input_mutation(handle_django_errors=False)
     @transaction.atomic
@@ -142,7 +150,7 @@ class Mutation:
     ) -> PhotoType:
         user = info.context.request.user
         photo = Photo(
-            file_name=photo,
+            file=photo,
             ratio=ratio,
             user=user,
             description=description,

@@ -64,9 +64,14 @@ class PhotoOrder:
     date_time: gql.auto
 
 
-@gql.django.type(models.Photo, directives=[IsAuthenticated()], order=PhotoOrder)
+@gql.django.filter(models.Photo)
+class PhotoFiler:
+    user: gql.auto
+
+
+@gql.django.type(models.Photo, directives=[IsAuthenticated()], order=PhotoOrder, filters=PhotoFiler)
 class PhotoType(relay.Node, ABC):
-    file_name: gql.auto
+    file: gql.auto
     ratio: gql.auto
     date_time: gql.auto
     user: "UserType"
@@ -76,9 +81,9 @@ class PhotoType(relay.Node, ABC):
     location: gql.auto
     comment_set: "relay.Connection[CommentType]" = gql.django.connection(name="comments")
 
-    @gql.django.field(only=["file_name"])
+    @gql.django.field(only=["file"])
     def url(self, root: models.Photo) -> str:
-        return root.file_name.url
+        return root.file.url
 
     @gql.django.field(
         prefetch_related=[
@@ -93,9 +98,9 @@ class PhotoType(relay.Node, ABC):
             return root.user_like.filter(pk=info.context.request.user.id).exists()
         return len(self.like_by_me) > 0
 
-    @gql.django.field(only=["file_name", "ratio"])
+    @gql.django.field(only=["file", "ratio"])
     def ratio(self, root: models.Photo) -> float:
-        return root.ratio if root.ratio != -1 else root.file_name.height / root.file_name.width
+        return root.ratio if root.ratio != -1 else root.file.height / root.file.width
 
 
 @gql.django.type(models.Comment, directives=[IsAuthenticated()])
@@ -111,7 +116,12 @@ class FeedOrder:
     date_time: gql.auto
 
 
-@gql.django.type(models.Feed, directives=[IsAuthenticated()], order=FeedOrder)
+@gql.django.filter(models.Feed)
+class FeedFilter:
+    user: gql.auto
+
+
+@gql.django.type(models.Feed, directives=[IsAuthenticated()], order=FeedOrder, filters=FeedFilter)
 class FeedType(relay.Node, ABC):
     user: "UserType"
     photo: "PhotoType"

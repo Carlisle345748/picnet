@@ -1,8 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import Prefetch
-from graphql_relay import to_global_id
-from strawberry_django_plus import gql
+from strawberry_django_plus import relay
 
 
 class Profile(models.Model):
@@ -13,7 +11,7 @@ class Profile(models.Model):
     following = models.ManyToManyField(User, related_name="following")
 
     def global_id(self):
-        return to_global_id("UserSchema", self.user.id)
+        return relay.to_base64("UserType", self.user.id)
 
     def name(self):
         return self.user.first_name + " " + self.user.last_name
@@ -30,7 +28,7 @@ class PhotoTag(models.Model):
 
 
 class Photo(models.Model):
-    file_name = models.ImageField(upload_to="images/")
+    file = models.ImageField(upload_to="images/")
     ratio = models.FloatField(default=-1)
     date_time = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -46,10 +44,10 @@ class Photo(models.Model):
         return self.user.username
 
     def global_id(self):
-        return to_global_id("PhotoSchema", self.id)
+        return relay.to_base64("PhotoType", self.id)
 
     def url(self):
-        return self.file_name.url
+        return self.file.url
 
     def photo_tags(self):
         return [t.tag for t in self.tags.all()]
