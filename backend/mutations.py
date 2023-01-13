@@ -15,7 +15,7 @@ from strawberry_django_plus.relay import GlobalID
 
 from .errors import ERR_USERNAME_EXIST, ERR_LOGIN
 from .models import Profile, Photo, Comment, PhotoTag, Feed
-from .types2 import UserType, CommentType, PhotoType, ProfileType
+from .types import UserType, CommentType, PhotoType, ProfileType
 
 UserModel = cast(Type[User], get_user_model())
 

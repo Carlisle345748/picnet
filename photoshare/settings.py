@@ -61,10 +61,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-GRAPHENE = {
-    'SCHEMA': 'backend.schema.schema',
-    'MIDDLEWARE': ['backend.schema.AuthorizationMiddleware']
-}
 
 ROOT_URLCONF = 'photoshare.urls'
 

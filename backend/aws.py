@@ -6,7 +6,7 @@ from django.conf import settings
 from strawberry_django_plus import gql
 
 from backend.directive import IsAuthenticated
-from backend.types2 import Location
+from backend.types import Location
 
 location_client = boto3.client(
     'location',

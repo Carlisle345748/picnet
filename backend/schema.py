@@ -1,72 +1,62 @@
-from graphene_django.filter import DjangoFilterConnectionField
-from graphene import relay
+from typing import List, Optional
+
 from django.core.files.storage import default_storage
+from django.db.models import Count
+from strawberry import UNSET
+from strawberry_django_plus.directives import SchemaDirectiveExtension
+from strawberry_django_plus.optimizer import DjangoOptimizerExtension
 
-from .aws import AWSQuery
-from .errors import ERR_NOT_LOGIN
-from .mutation import *
+from backend.aws import AWSQuery
+from backend.models import PhotoTag
+from backend.mutations import Mutation
+from backend.types import *
 
-WHITE_LIST = ['login', 'logout', 'createUser', '__schema', 'backgroundImage']
 
+@gql.type
+class CostumeQuery:
 
-class CostumeQuery(graphene.ObjectType):
-    top_tags = graphene.List(HotTag,
-                             text=graphene.String(default_value=""),
-                             top_n=graphene.Int(default_value=5))
-    background_image = graphene.String()
-
-    def resolve_background_image(self, info):
+    @gql.field()
+    def background_image(self) -> str:
         return default_storage.url('background.png')
 
-    def resolve_top_tags(self, _, top_n, text):
+    @gql.field(directives=[IsAuthenticated()])
+    def top_tags(self, top_n: Optional[int] = 5, text: Optional[str] = UNSET) -> List[HotTag]:
         tags = PhotoTag.objects
-        if text != "":
+        if text is not UNSET:
             tags = tags.filter(tag__istartswith=text)
         tags = tags.annotate(Count('photo')).filter(photo__count__gte=1).order_by("-photo__count")[:top_n]
         return [HotTag(tag=t.tag, count=t.photo__count) for t in tags]
 
 
-class DataModelQuery(graphene.ObjectType):
-    users = DjangoFilterConnectionField(UserSchema, filterset_class=UserFilter)
-    photos = DjangoFilterConnectionField(PhotoSchema, filterset_class=PhotoFilter)
-    profiles = DjangoFilterConnectionField(ProfileSchema)
-    feeds = DjangoFilterConnectionField(FeedSchema, filterset_class=FeedFilter)
+@gql.type
+class ModelQuery:
+    user: Optional[UserType] = gql.django.node(directives=[IsAuthenticated()])
 
-    photo = relay.Node.Field(PhotoSchema)
-    user = relay.Node.Field(UserSchema)
-    profile = relay.Node.Field(ProfileSchema)
+    users: relay.Connection[UserType] = gql.django.connection(directives=[IsAuthenticated()])
+
+    profile: Optional[relay.Node] = gql.django.node()
+
+    profiles: relay.Connection[ProfileType] = gql.django.connection()
+
+    photo: Optional[PhotoType] = gql.django.node()
+
+    photos: relay.Connection[PhotoType] = gql.django.connection()
+
+    comment: Optional[CommentType] = gql.django.node()
+
+    feeds: relay.Connection[FeedType] = gql.django.connection()
 
 
-class Query(DataModelQuery, CostumeQuery, AWSQuery, graphene.ObjectType):
+@gql.type
+class Query(ModelQuery, CostumeQuery, AWSQuery):
     pass
 
 
-class Mutations(graphene.ObjectType):
-    create_comment = CreateComment.Field()
-    update_photo_like = UpdatePhotoLike.Field()
-    update_follower = UpdateFollower.Field()
-    update_profile = UpdateProfile.Field()
-
-    upload_photo = UploadPhoto.Field()
-    upload_avatar = UploadAvatar.Field()
-
-    delete_photo = DeletePhoto.Field()
-    delete_comment = DeleteComment.Field()
-
-    create_user = CreateUser.Field()
-    login = Login.Field()
-    logout = Logout.Field()
-
-
-class AuthorizationMiddleware:
-    def __init__(self):
-        self.white_list = WHITE_LIST
-
-    def resolve(self, next, root, info, **args):
-        if root is None:
-            if info.field_name not in self.white_list and not info.context.user.is_authenticated:
-                raise GraphQLError(message="user not login", extensions=ERR_NOT_LOGIN)
-        return next(root, info, **args)
-
-
-schema = graphene.Schema(query=Query, mutation=Mutations)
+schema = gql.Schema(
+    query=Query,
+    mutation=Mutation,
+    extensions=[
+        SchemaDirectiveExtension,
+        DjangoOptimizerExtension,
+    ],
+)
