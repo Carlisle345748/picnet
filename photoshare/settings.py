@@ -43,12 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'backend',
-    'graphene_django',
     'django.contrib.postgres',
     'ebhealthcheck.apps.EBHealthCheckConfig',
     'algoliasearch_django',
     'strawberry.django',
-    'strawberry_django_plus'
+    'strawberry_django_plus',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [
@@ -60,7 +60,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 
 ROOT_URLCONF = 'photoshare.urls'
 
@@ -176,6 +175,10 @@ LOGGING = {
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
         }
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
     },
     'loggers': {
         'django.db.backends': {
