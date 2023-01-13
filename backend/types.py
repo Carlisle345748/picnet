@@ -20,6 +20,16 @@ class UserFilter:
     username: gql.auto
 
 
+@gql.django.order(models.Photo)
+class PhotoOrder:
+    date_time: gql.auto
+
+
+@gql.django.filter(models.Photo)
+class PhotoFiler:
+    user: gql.auto
+
+
 @gql.django.type(UserModel, filters=UserFilter, select_related="profile")
 class UserType(relay.Node, ABC):
     username: gql.auto
@@ -27,7 +37,9 @@ class UserType(relay.Node, ABC):
     last_name: gql.auto
     email: gql.auto
     profile: "ProfileType"
-    photo_set: "relay.Connection[PhotoType]" = gql.django.connection(name="photos")
+    photo_set: "relay.Connection[PhotoType]" = gql.django.connection(
+        name="photos", filters=PhotoFiler, order=PhotoOrder
+    )
 
 
 @gql.django.type(models.Profile, directives=[IsAuthenticated()])
@@ -57,16 +69,6 @@ class ProfileType(relay.Node, ABC):
 @gql.django.type(models.PhotoTag, directives=[IsAuthenticated()])
 class PhotoTagType(relay.Node, ABC):
     tag: gql.auto
-
-
-@gql.django.order(models.Photo)
-class PhotoOrder:
-    date_time: gql.auto
-
-
-@gql.django.filter(models.Photo)
-class PhotoFiler:
-    user: gql.auto
 
 
 @gql.django.type(models.Photo, directives=[IsAuthenticated()], order=PhotoOrder, filters=PhotoFiler)
