@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import cast, Type
+from typing import cast, Type, Iterable
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
@@ -10,6 +10,7 @@ from strawberry_django_plus.gql import relay
 
 from . import models
 from .directive import IsAuthenticated
+from .models import Photo
 
 UserModel = cast(Type[AbstractUser], get_user_model())
 
@@ -30,24 +31,12 @@ class PhotoFiler:
     user: gql.auto
 
 
-@gql.django.type(UserModel, filters=UserFilter, select_related="profile")
-class UserType(relay.Node, ABC):
-    username: gql.auto
-    first_name: gql.auto
-    last_name: gql.auto
-    email: gql.auto
-    profile: "ProfileType"
-    photo_set: "relay.Connection[PhotoType]" = gql.django.connection(
-        name="photos", filters=PhotoFiler, order=PhotoOrder
-    )
-
-
 @gql.django.type(models.Profile, directives=[IsAuthenticated()])
 class ProfileType(relay.Node, ABC):
     user: "UserType"
     description: gql.auto
-    follower: relay.Connection[UserType]
-    following: relay.Connection[UserType]
+    follower: relay.Connection["UserType"]
+    following: relay.Connection["UserType"]
 
     @gql.django.field(only=["avatar"])
     def avatar(self, root: models.Profile) -> str:
@@ -77,7 +66,7 @@ class PhotoType(relay.Node, ABC):
     ratio: gql.auto
     date_time: gql.auto
     user: "UserType"
-    user_like: relay.Connection[UserType]
+    user_like: relay.Connection["UserType"]
     description: gql.auto
     tags: relay.Connection[PhotoTagType]
     location: gql.auto
@@ -103,6 +92,19 @@ class PhotoType(relay.Node, ABC):
     @gql.django.field(only=["file", "ratio"])
     def ratio(self, root: models.Photo) -> float:
         return root.ratio if root.ratio != -1 else root.file.height / root.file.width
+
+
+@gql.django.type(UserModel, filters=UserFilter, select_related="profile")
+class UserType(relay.Node, ABC):
+    username: gql.auto
+    first_name: gql.auto
+    last_name: gql.auto
+    email: gql.auto
+    profile: "ProfileType"
+
+    @gql.django.connection(name="photos", filters=PhotoFiler, order=PhotoOrder)
+    def photo_set(self, root: UserModel) -> Iterable["PhotoType"]:
+        return Photo.objects.filter(user_id=root.id)
 
 
 @gql.django.type(models.Comment, directives=[IsAuthenticated()])

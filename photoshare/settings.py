@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'algoliasearch_django',
     'strawberry.django',
     'strawberry_django_plus',
+    "debug_toolbar",
     'django_cleanup.apps.CleanupConfig',
 ]
 
@@ -59,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "strawberry_django_plus.middlewares.debug_toolbar.DebugToolbarMiddleware"
 ]
 
 ROOT_URLCONF = 'photoshare.urls'
@@ -144,7 +146,8 @@ STATIC_URL = "static/"
 
 STATIC_ROOT = "static/"
 
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage' if DEBUG \
+    else 'storages.backends.s3boto3.S3StaticStorage'
 
 STATICFILES_DIRS = [
     "frontend/build/static",
@@ -160,7 +163,8 @@ MEDIA_URL = "media/"
 
 MEDIA_ROOT = "media/"
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage' if DEBUG \
+    else 'storages.backends.s3boto3.S3Boto3Storage'
 
 LOGGING = {
     'version': 1,
@@ -206,3 +210,7 @@ ALGOLIA = {
     'INDEX_PREFIX': "photo_share",
     'INDEX_SUFFIX': "dev" if DEBUG else "prod"
 }
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
