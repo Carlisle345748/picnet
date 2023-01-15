@@ -37,6 +37,9 @@ class Photo(models.Model):
     tags = models.ManyToManyField(PhotoTag)
     location = models.CharField(max_length=200, default="")
 
+    class Meta:
+        indexes = [models.Index(fields=["-date_time"])]
+
     def user_fullname(self):
         return self.user.first_name + " " + self.user.last_name
 

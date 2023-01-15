@@ -102,8 +102,8 @@ class UserType(relay.Node, ABC):
     email: gql.auto
     profile: "ProfileType"
 
-    @gql.django.connection(name="photos", filters=PhotoFiler, order=PhotoOrder)
-    def photo_set(self, root: UserModel) -> Iterable["PhotoType"]:
+    @gql.django.connection(filters=PhotoFiler, order=PhotoOrder)
+    def photos(self, root: UserModel) -> Iterable["PhotoType"]:
         return Photo.objects.filter(user_id=root.id)
 
 
