@@ -204,6 +204,8 @@ AWS_S3_REGION_NAME = 'us-west-2'
 
 AWS_LOCATION = 'static/'
 
+AWS_S3_FILE_OVERWRITE = False
+
 ALGOLIA = {
     'APPLICATION_ID': os.environ["ALGOLIA_APPLICATION_ID"],
     'API_KEY': os.environ["ALGOLIA_API_KEY"],
