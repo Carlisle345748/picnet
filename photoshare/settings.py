@@ -29,6 +29,7 @@ DEBUG = os.environ['DEBUG'] == "True" if "DEBUG" in os.environ else True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
+    'picnet.me',
     'photo-share-app.net',
     'photoshare-dev.us-west-2.elasticbeanstalk.com'
 ]
