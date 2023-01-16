@@ -1,4 +1,4 @@
-# PhotoShare Website Front
+# Photo Sharing Website
 
-- Website: [photo-share-app.net](https://photo-share-app.net)
+- Website: [picnet.me](https://picnet.me)
 - Frontend: https://github.com/Carlisle345748/PhotoShareFrontend
