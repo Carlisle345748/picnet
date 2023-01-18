@@ -28,6 +28,7 @@ SECRET_KEY = os.environ['SECRET_KEY'] if 'SECRET_KEY' in os.environ \
 DEBUG = os.environ['DEBUG'] == "True" if "DEBUG" in os.environ else True
 
 ALLOWED_HOSTS = [
+    'localhost',
     '127.0.0.1',
     'picnet.me',
     'photo-share-app.net',
