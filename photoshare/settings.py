@@ -51,10 +51,12 @@ INSTALLED_APPS = [
     'strawberry.django',
     'strawberry_django_plus',
     "debug_toolbar",
+    'corsheaders',
     'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -217,4 +219,12 @@ ALGOLIA = {
 
 INTERNAL_IPS = [
     "127.0.0.1",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost',
+    'http://127.0.0.1',
+    'https://picnet.me',
+    'https://photo-share-app.net',
+    'https://photoshare-dev.us-west-2.elasticbeanstalk.com'
 ]
