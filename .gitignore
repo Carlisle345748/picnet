@@ -11,3 +11,5 @@ docker-compose.yaml
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+bootstrap.sh

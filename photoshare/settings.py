@@ -152,7 +152,7 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage' if
     else 'storages.backends.s3boto3.S3StaticStorage'
 
 STATICFILES_DIRS = [
-    "frontend/build/static",
+    "frontend/dist",
 ]
 
 # Default primary key field type
@@ -177,7 +177,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
         }
