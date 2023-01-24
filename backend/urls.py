@@ -8,7 +8,7 @@ from backend.schema import schema
 
 app_name = 'backend'
 
-graphql_view = GraphQLView.as_view(schema=schema)
+graphql_view = GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG, allow_queries_via_get=False)
 
 urlpatterns = [
     path("graphql", csrf_exempt(graphql_view) if settings.DEBUG else graphql_view),
