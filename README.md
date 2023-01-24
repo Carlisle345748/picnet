@@ -3,4 +3,4 @@
 - Website: [picnet.me](https://picnet.me)
 - Frontend: https://github.com/Carlisle345748/picnet-frontend
 
-<img src="https://d1mwzc9v8ocr0h.cloudfront.net/static/demo.jpeg" alt="demo">
+<img src="https://d1mwzc9v8ocr0h.cloudfront.net/static/github-demo.jpeg" alt="demo">
