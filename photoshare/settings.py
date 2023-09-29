@@ -32,7 +32,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'picnet.me',
     'photo-share-app.net',
-    'photoshare-dev.us-west-2.elasticbeanstalk.com'
+    'photoshare-dev.us-west-2.elasticbeanstalk.com',
+    '.vercel.app'
 ]
 
 # Application definition
@@ -96,6 +97,16 @@ if 'RDS_HOSTNAME' in os.environ:
             'PASSWORD': os.environ['RDS_PASSWORD'],
             'HOST': os.environ['RDS_HOSTNAME'],
             'PORT': os.environ['RDS_PORT'],
+        }
+    }
+elif 'POSTGRES_HOST' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ['POSTGRES_DATABASE'],
+            'USER': os.environ['POSTGRES_PASSWORD'],
+            'PASSWORD': os.environ['POSTGRES_PASSWORD'],
+            'HOST': os.environ['POSTGRES_HOST'],
         }
     }
 else:
