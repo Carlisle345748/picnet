@@ -1,10 +1,10 @@
 {
-  "functions": {
-    "photoshare/wsgi.py": {
-      "memory": 3008,
-      "maxDuration": 30
+  "builds": [
+    {
+      "src": "photoshare/wsgi.py",
+      "use": "@vercel/python"
     }
-  },
+  ],
   "routes": [
     {
       "src": "/(.*)",
