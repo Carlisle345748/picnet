@@ -3,23 +3,23 @@ from typing import List, Optional
 from django.core.files.storage import default_storage
 from django.db.models import Count
 from strawberry import UNSET
-from strawberry_django_plus.directives import SchemaDirectiveExtension
-from strawberry_django_plus.optimizer import DjangoOptimizerExtension
+from strawberry_django.optimizer import DjangoOptimizerExtension
 
 from backend.aws import AWSQuery
 from backend.models import PhotoTag
 from backend.mutations import Mutation
 from backend.types import *
+from backend.directive import IsAuthenticated
 
 
-@gql.type
+@strawberry.type
 class CostumeQuery:
 
-    @gql.field()
+    @strawberry.field()
     def background_image(self) -> str:
         return default_storage.url('background.png')
 
-    @gql.field(directives=[IsAuthenticated()])
+    @strawberry.field(extensions=[IsAuthenticated()])
     def top_tags(self, top_n: Optional[int] = 5, text: Optional[str] = UNSET) -> List[HotTag]:
         tags = PhotoTag.objects
         if text is not UNSET:
@@ -28,35 +28,34 @@ class CostumeQuery:
         return [HotTag(tag=t.tag, count=t.photo__count) for t in tags]
 
 
-@gql.type
+@strawberry.type
 class ModelQuery:
-    user: Optional[UserType] = gql.django.node(directives=[IsAuthenticated()])
+    user: Optional[UserType] = strawberry_django.node(extensions=[IsAuthenticated()])
 
-    users: relay.Connection[UserType] = gql.django.connection(directives=[IsAuthenticated()])
+    users: ListConnectionWithTotalCount[UserType] = strawberry_django.connection(extensions=[IsAuthenticated()])
 
-    profile: Optional[relay.Node] = gql.django.node()
+    profile: Optional[relay.Node] = strawberry_django.node(extensions=[IsAuthenticated()])
 
-    profiles: relay.Connection[ProfileType] = gql.django.connection()
+    profiles: ListConnectionWithTotalCount[ProfileType] = strawberry_django.connection(extensions=[IsAuthenticated()])
 
-    photo: Optional[PhotoType] = gql.django.node()
+    photo: Optional[PhotoType] = strawberry_django.node(extensions=[IsAuthenticated()])
 
-    photos: relay.Connection[PhotoType] = gql.django.connection()
+    photos: ListConnectionWithTotalCount[PhotoType] = strawberry_django.connection(extensions=[IsAuthenticated()])
 
-    comment: Optional[CommentType] = gql.django.node()
+    comment: Optional[CommentType] = strawberry_django.node(extensions=[IsAuthenticated()])
 
-    feeds: relay.Connection[FeedType] = gql.django.connection()
+    feeds: ListConnectionWithTotalCount[FeedType] = strawberry_django.connection(extensions=[IsAuthenticated()])
 
 
-@gql.type
+@strawberry.type
 class Query(ModelQuery, CostumeQuery, AWSQuery):
     pass
 
 
-schema = gql.Schema(
+schema = strawberry.Schema(
     query=Query,
     mutation=Mutation,
     extensions=[
-        SchemaDirectiveExtension,
         DjangoOptimizerExtension,
     ],
 )

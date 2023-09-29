@@ -1,144 +1,127 @@
-from abc import ABC
 from typing import cast, Type, Iterable
 
+import strawberry.django
+import strawberry_django
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
-from django.db.models import Prefetch
+from strawberry import auto
+from strawberry import relay
 from strawberry.types import Info
-from strawberry_django_plus import gql
-from strawberry_django_plus.gql import relay
+from strawberry_django.relay import ListConnectionWithTotalCount
 
 from . import models
-from .directive import IsAuthenticated
 from .models import Photo
 
 UserModel = cast(Type[AbstractUser], get_user_model())
 
 
-@gql.django.filter(UserModel, lookups=True)
+@strawberry.django.filter(UserModel, lookups=True)
 class UserFilter:
-    id: gql.auto
-    username: gql.auto
+    id: auto
+    username: auto
 
 
-@gql.django.order(models.Photo)
+@strawberry.django.order(models.Photo)
 class PhotoOrder:
-    date_time: gql.auto
+    date_time: auto
 
 
-@gql.django.filter(models.Photo)
+@strawberry.django.filter(models.Photo)
 class PhotoFiler:
-    user: gql.auto
+    user: auto
 
 
-@gql.django.type(models.Profile, directives=[IsAuthenticated()])
-class ProfileType(relay.Node, ABC):
+@strawberry_django.type(models.Profile)
+class ProfileType(relay.Node):
     user: "UserType"
-    description: gql.auto
-    follower: relay.Connection["UserType"]
-    following: relay.Connection["UserType"]
+    description: auto
+    follower: ListConnectionWithTotalCount["UserType"] = strawberry_django.connection()
+    following: ListConnectionWithTotalCount["UserType"] = strawberry_django.connection()
 
-    @gql.django.field(only=["avatar"])
-    def avatar(self, root: models.Profile) -> str:
-        return root.avatar.url if root.avatar.name != "" else ""
+    @strawberry_django.field(name="avatar", only=["avatar"])
+    def avatar_url(self) -> str:
+        return self.avatar_url
 
-    @gql.django.field(prefetch_related=[
-        lambda info: Prefetch(
-            "follower",
-            queryset=UserModel.objects.filter(pk=info.context.request.user.id),
-            to_attr="followed_by_me"
-        )
-    ])
-    def is_following(self, info: Info, root: models.Profile) -> bool:
-        if not hasattr(self, "followed_by_me"):
-            return root.follower.filter(pk=info.context.request.user.id).exists()
-        return len(self.followed_by_me) > 0
+    @strawberry_django.field(prefetch_related=["follower"])
+    def is_following(self, info: Info) -> bool:
+        return self.follower.filter(pk=info.context.request.user.id).exists()
 
 
-@gql.django.type(models.PhotoTag, directives=[IsAuthenticated()])
-class PhotoTagType(relay.Node, ABC):
-    tag: gql.auto
+@strawberry_django.type(models.PhotoTag)
+class PhotoTagType(relay.Node):
+    tag: auto
 
 
-@gql.django.type(models.Photo, directives=[IsAuthenticated()], order=PhotoOrder, filters=PhotoFiler)
-class PhotoType(relay.Node, ABC):
-    file: gql.auto
-    ratio: gql.auto
-    date_time: gql.auto
+@strawberry_django.type(models.Photo, order=PhotoOrder, filters=PhotoFiler)
+class PhotoType(relay.Node):
+    file: auto
+    ratio: auto
+    date_time: auto
     user: "UserType"
-    user_like: relay.Connection["UserType"]
-    description: gql.auto
-    tags: relay.Connection[PhotoTagType]
-    location: gql.auto
-    comment_set: "relay.Connection[CommentType]" = gql.django.connection(name="comments")
+    user_like: ListConnectionWithTotalCount["UserType"] = strawberry_django.connection()
+    description: auto
+    tags: ListConnectionWithTotalCount[PhotoTagType] = strawberry_django.connection()
+    location: auto
+    comments: "ListConnectionWithTotalCount[CommentType]" = strawberry_django.connection(name="comments")
 
-    @gql.django.field(only=["file"])
-    def url(self, root: models.Photo) -> str:
-        return root.file.url
+    @strawberry_django.field(only=["file"])
+    def url(self) -> str:
+        return self.file.url
 
-    @gql.django.field(
-        prefetch_related=[
-            lambda info: Prefetch(
-                "user_like",
-                queryset=UserModel.objects.filter(pk=info.context.request.user.id),
-                to_attr="like_by_me")
-        ]
-    )
-    def is_like(self, info: Info, root: models.Photo) -> bool:
-        if not hasattr(self, "like_by_me"):
-            return root.user_like.filter(pk=info.context.request.user.id).exists()
-        return len(self.like_by_me) > 0
+    @strawberry_django.field(prefetch_related=["user_like"])
+    def is_like(self, info: Info) -> bool:
+        return self.user_like.filter(pk=info.context.request.user.id).exists()
 
-    @gql.django.field(only=["file", "ratio"])
-    def ratio(self, root: models.Photo) -> float:
-        return root.ratio if root.ratio != -1 else root.file.height / root.file.width
+    @strawberry_django.field(only=["file", "ratio"])
+    def ratio(self) -> float:
+        return self.ratio if self.ratio != -1 else self.file.height / self.file.width
 
 
-@gql.django.type(UserModel, filters=UserFilter, select_related="profile")
-class UserType(relay.Node, ABC):
-    username: gql.auto
-    first_name: gql.auto
-    last_name: gql.auto
-    email: gql.auto
+@strawberry_django.type(UserModel, filters=UserFilter, select_related="profile")
+class UserType(relay.Node):
+    username: auto
+    first_name: auto
+    last_name: auto
+    email: auto
     profile: "ProfileType"
 
-    @gql.django.connection(filters=PhotoFiler, order=PhotoOrder)
-    def photos(self, root: UserModel) -> Iterable["PhotoType"]:
-        return Photo.objects.filter(user_id=root.id)
+    @strawberry_django.connection(ListConnectionWithTotalCount[PhotoType], filters=PhotoFiler, order=PhotoOrder)
+    def photos(self) -> Iterable["PhotoType"]:
+        return Photo.objects.filter(user_id=self.id)
 
 
-@gql.django.type(models.Comment, directives=[IsAuthenticated()])
-class CommentType(relay.Node, ABC):
-    comment: gql.auto
-    date_time: gql.auto
+@strawberry_django.type(models.Comment)
+class CommentType(relay.Node):
+    comment: auto
+    date_time: auto
     photo: "PhotoType"
     user: "UserType"
 
 
-@gql.django.order(models.Feed)
+@strawberry.django.order(models.Feed)
 class FeedOrder:
-    date_time: gql.auto
+    date_time: auto
 
 
-@gql.django.filter(models.Feed)
+@strawberry.django.filter(models.Feed)
 class FeedFilter:
-    user: gql.auto
+    user: "UserType"
 
 
-@gql.django.type(models.Feed, directives=[IsAuthenticated()], order=FeedOrder, filters=FeedFilter)
-class FeedType(relay.Node, ABC):
+@strawberry_django.type(models.Feed, order=FeedOrder, filters=FeedFilter)
+class FeedType(relay.Node):
     user: "UserType"
     photo: "PhotoType"
-    date_time: gql.auto
+    date_time: auto
 
 
-@gql.type
+@strawberry.type
 class HotTag:
     tag: str
     count: int
 
 
-@gql.type
+@strawberry.type
 class Location:
     full_address: str
     main: str

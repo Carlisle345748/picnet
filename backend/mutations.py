@@ -1,5 +1,6 @@
 from typing import Optional, cast, Type, List
 
+import strawberry.django
 from algoliasearch_django import update_records, save_record
 from algoliasearch_django.decorators import disable_auto_indexing
 from django.contrib.auth import get_user_model, authenticate, login, logout
@@ -7,12 +8,12 @@ from django.contrib.auth.models import User
 from django.db import transaction, IntegrityError
 from graphql import GraphQLError
 from strawberry.file_uploads import Upload
+from strawberry.relay import GlobalID
 from strawberry.types import Info
 from strawberry_django import auth
-from strawberry_django_plus import gql
-from strawberry_django_plus.mutations import resolvers
-from strawberry_django_plus.relay import GlobalID
+from strawberry_django.mutations import resolvers
 
+from .directive import IsAuthenticated
 from .errors import ERR_USERNAME_EXIST, ERR_LOGIN
 from .models import Profile, Photo, Comment, PhotoTag, Feed
 from .types import UserType, CommentType, PhotoType, ProfileType
@@ -20,18 +21,18 @@ from .types import UserType, CommentType, PhotoType, ProfileType
 UserModel = cast(Type[User], get_user_model())
 
 
-@gql.type
+@strawberry.type
 class UpdateFollowerResult:
     user: UserType
     follow_user: UserType
 
 
 # noinspection PyShadowingBuiltins
-@gql.type
+@strawberry.type
 class Mutation:
     logout = auth.logout()
 
-    @gql.django.mutation(handle_django_errors=False)
+    @strawberry.django.mutation(handle_django_errors=False)
     def login(self, info: Info, username: str, password: str) -> UserType:
         request = info.context.request
         user = authenticate(request, username=username, password=password)
@@ -41,7 +42,7 @@ class Mutation:
         login(request, user)
         return cast(UserType, user)
 
-    @gql.django.input_mutation(handle_django_errors=False)
+    @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
     @transaction.atomic
     def create_user(
             self,
@@ -65,7 +66,7 @@ class Mutation:
         except IntegrityError:
             raise GraphQLError(message="username already exist", extensions=ERR_USERNAME_EXIST)
 
-    @gql.django.input_mutation(handle_django_errors=False)
+    @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
     @transaction.atomic
     def create_comment(self, info: Info, photo_id: GlobalID, comment: str) -> CommentType:
         new_comment = Comment.objects.create(
@@ -80,7 +81,7 @@ class Mutation:
         )
         return cast(CommentType, new_comment)
 
-    @gql.django.input_mutation(handle_django_errors=False)
+    @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
     @transaction.atomic
     def update_profile(self, info: Info, first_name: str, last_name: str, description: str) -> UserType:
         user = info.context.request.user
@@ -91,7 +92,7 @@ class Mutation:
         user.profile.save()
         return cast(UserType, user)
 
-    @gql.django.input_mutation(handle_django_errors=False)
+    @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
     @transaction.atomic
     def update_photo_like(self, info: Info, photo_id: GlobalID, like: bool) -> PhotoType:
         user = info.context.request.user
@@ -102,7 +103,7 @@ class Mutation:
             photo.user_like.remove(user)
         return cast(PhotoType, photo)
 
-    @gql.django.input_mutation(handle_django_errors=False)
+    @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
     @transaction.atomic
     def update_follower(self, info: Info, user_id: GlobalID, follow: bool) -> UpdateFollowerResult:
         logged_in_user: User = info.context.request.user
@@ -115,12 +116,12 @@ class Mutation:
             follow_user.profile.follower.remove(logged_in_user)
         return UpdateFollowerResult(user=logged_in_user, follow_user=follow_user)
 
-    @gql.django.input_mutation(handle_django_errors=False)
+    @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
     def delete_photo(self, info: Info, id: GlobalID) -> PhotoType:
         photo = Photo.objects.get(pk=id.node_id)
         return cast(PhotoType, resolvers.delete(info, photo))
 
-    @gql.django.input_mutation(handle_django_errors=False)
+    @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
     def delete_comment(self, info: Info, id: GlobalID) -> CommentType:
         comment = Comment.objects.get(pk=id.node_id)
         comment = resolvers.delete(info, comment)
@@ -129,14 +130,14 @@ class Mutation:
         update_records(model=Photo, qs=qs, photo_comments=qs[0].photo_comments())
         return cast(CommentType, comment)
 
-    @gql.django.input_mutation(handle_django_errors=False)
+    @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
     def upload_avatar(self, info: Info, avatar: Upload) -> ProfileType:
         profile = info.context.request.user.profile
         profile.avatar = avatar
         profile.save()
         return cast(ProfileType, profile)
 
-    @gql.django.input_mutation(handle_django_errors=False)
+    @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
     @disable_auto_indexing(model=Photo)
     @transaction.atomic
     def upload_photo(

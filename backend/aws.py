@@ -1,9 +1,9 @@
 from typing import Optional, List
 
 import boto3
+import strawberry
 from cachetools import cached, TTLCache
 from django.conf import settings
-from strawberry_django_plus import gql
 
 from backend.directive import IsAuthenticated
 from backend.types import Location
@@ -33,10 +33,9 @@ def parse_address(address: str) -> Location:
     return Location(main=main, secondary=secondary, full_address=address)
 
 
-@gql.type
+@strawberry.type
 class AWSQuery:
-
-    @gql.field(directives=[IsAuthenticated()])
+    @strawberry.field(extensions=[IsAuthenticated()])
     def location_suggestions(self, text: str, top_n: Optional[int] = 5) -> List[Location]:
         addresses = get_suggestion(text, top_n)
         return [parse_address(a) for a in addresses]

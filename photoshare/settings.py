@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'ebhealthcheck.apps.EBHealthCheckConfig',
     'algoliasearch_django',
     'strawberry.django',
-    'strawberry_django_plus',
+    "strawberry_django",
     "debug_toolbar",
     'django_cleanup.apps.CleanupConfig',
 ]
@@ -62,7 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "strawberry_django_plus.middlewares.debug_toolbar.DebugToolbarMiddleware"
+    'strawberry_django.middlewares.debug_toolbar.DebugToolbarMiddleware'
 ]
 
 ROOT_URLCONF = 'photoshare.urls'
@@ -218,3 +218,7 @@ ALGOLIA = {
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+STRAWBERRY_DJANGO = {
+    "MAP_AUTO_ID_AS_GLOBAL_ID": True,
+}

@@ -2,9 +2,8 @@ import hashlib
 import secrets
 
 from django.core.files.storage import FileSystemStorage
-from graphene.relay.node import from_global_id
+from strawberry import relay
 from graphql import GraphQLError
-from strawberry_django_plus import relay
 
 from backend.errors import ERR_NOT_LOGIN
 

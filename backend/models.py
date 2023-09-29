@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from strawberry_django_plus import relay
+from strawberry import relay
 
 
 class Profile(models.Model):
@@ -10,15 +10,19 @@ class Profile(models.Model):
     follower = models.ManyToManyField(User, related_name="follower")
     following = models.ManyToManyField(User, related_name="following")
 
+    @property
     def global_id(self):
         return relay.to_base64("UserType", self.user.id)
 
+    @property
     def name(self):
         return self.user.first_name + " " + self.user.last_name
 
+    @property
     def avatar_url(self):
         return self.avatar.url if self.avatar.name != "" else ""
 
+    @property
     def username(self):
         return self.user.username
 
@@ -40,29 +44,35 @@ class Photo(models.Model):
     class Meta:
         indexes = [models.Index(fields=["-date_time"])]
 
+    @property
     def user_fullname(self):
         return self.user.first_name + " " + self.user.last_name
 
+    @property
     def username(self):
         return self.user.username
 
+    @property
     def global_id(self):
         return relay.to_base64("PhotoType", self.id)
 
+    @property
     def url(self):
         return self.file.url
 
+    @property
     def photo_tags(self):
         return [t.tag for t in self.tags.all()]
 
+    @property
     def photo_comments(self):
-        return [c.comment for c in self.comment_set.all()]
+        return [c.comment for c in self.comments.all()]
 
 
 class Comment(models.Model):
     comment = models.CharField(default="", max_length=400)
     date_time = models.DateTimeField(auto_now_add=True)
-    photo = models.ForeignKey(Photo, on_delete=models.CASCADE)
+    photo = models.ForeignKey(Photo, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
