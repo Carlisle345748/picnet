@@ -1,5 +1,5 @@
-algoliasearch==2.6.2
-algoliasearch-django==2.0.0
+algoliasearch==3.0.0
+algoliasearch-django==3.0.0
 aniso8601==9.0.1
 anyio==3.6.2
 asgiref==3.6.0
