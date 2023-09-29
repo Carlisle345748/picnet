@@ -122,12 +122,13 @@ class Mutation:
         return cast(PhotoType, resolvers.delete(info, photo))
 
     @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
+    @transaction.atomic
     def delete_comment(self, info: Info, id: GlobalID) -> CommentType:
         comment = Comment.objects.get(pk=id.node_id)
         comment = resolvers.delete(info, comment)
 
         qs = Photo.objects.filter(pk=comment.photo_id)
-        update_records(model=Photo, qs=qs, photo_comments=qs[0].photo_comments())
+        update_records(model=Photo, qs=qs, photo_comments=qs[0].photo_comments)
         return cast(CommentType, comment)
 
     @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
