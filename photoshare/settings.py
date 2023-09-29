@@ -83,7 +83,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'photoshare.wsgi.application'
+WSGI_APPLICATION = 'photoshare.wsgi.app'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
