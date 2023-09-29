@@ -27,7 +27,7 @@ django-cors-headers==3.13.0
 django-ebhealthcheck==2.0.2
 django-extensions==3.2.1
 django-filter==22.1
-django-storages==1.13.2
+django-storages==1.14.1
 django_debug_toolbar==3.8.1
 djangorestframework==3.14.0
 dnspython==2.2.1
