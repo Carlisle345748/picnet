@@ -13,3 +13,4 @@ docker-compose.yaml
 !.elasticbeanstalk/*.global.yml
 
 bootstrap.sh
+.vercel
