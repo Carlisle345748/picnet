@@ -162,9 +162,7 @@ STATIC_ROOT = "static/"
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage' if DEBUG \
     else 'storages.backends.s3boto3.S3StaticStorage'
 
-STATICFILES_DIRS = [
-    "frontend/dist",
-]
+STATICFILES_DIRS = ["frontend/dist"] if DEBUG else []
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
