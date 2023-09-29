@@ -3,6 +3,10 @@
     {
       "src": "photoshare/wsgi.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "migrate.sh",
+      "use": "@vercel-bash"
     }
   ],
   "routes": [
