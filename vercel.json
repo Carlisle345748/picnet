@@ -6,7 +6,7 @@
     },
     {
       "src": "migrate.sh",
-      "use": "@vercel-bash"
+      "use": "@vercel/static-build"
     }
   ],
   "routes": [
