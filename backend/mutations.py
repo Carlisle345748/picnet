@@ -42,7 +42,7 @@ class Mutation:
         login(request, user)
         return cast(UserType, user)
 
-    @strawberry.django.input_mutation(handle_django_errors=False, extensions=[IsAuthenticated()])
+    @strawberry.django.input_mutation(handle_django_errors=False)
     @transaction.atomic
     def create_user(
             self,
