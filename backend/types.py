@@ -39,13 +39,13 @@ class ProfileType(relay.Node):
     follower: ListConnectionWithTotalCount["UserType"] = strawberry_django.connection()
     following: ListConnectionWithTotalCount["UserType"] = strawberry_django.connection()
 
-    @staticmethod
     @strawberry_django.field(name="avatar", only=["avatar"])
+    @staticmethod
     def avatar_url(parent: Parent[models.Profile]) -> str:
         return parent.avatar_url
 
-    @staticmethod
     @strawberry_django.field(prefetch_related=["follower"])
+    @staticmethod
     def is_following(parent: Parent[models.Profile], info: Info) -> bool:
         return parent.follower.filter(pk=info.context.request.user.id).exists()
 
@@ -67,18 +67,18 @@ class PhotoType(relay.Node):
     location: auto
     comments: "ListConnectionWithTotalCount[CommentType]" = strawberry_django.connection(name="comments")
 
-    @staticmethod
     @strawberry_django.field(only=["file"])
+    @staticmethod
     def url(parent: Parent[models.Photo]) -> str:
         return parent.file.url
 
-    @staticmethod
     @strawberry_django.field(prefetch_related=["user_like"])
+    @staticmethod
     def is_like(parent: Parent[models.Photo], info: Info) -> bool:
         return parent.user_like.filter(pk=info.context.request.user.id).exists()
 
-    @staticmethod
     @strawberry_django.field(only=["file", "ratio"])
+    @staticmethod
     def ratio(parent: Parent[models.Photo]) -> float:
         return parent.ratio if parent.ratio != -1 else parent.file.height / parent.file.width
 
@@ -91,8 +91,8 @@ class UserType(relay.Node):
     email: auto
     profile: "ProfileType"
 
-    @staticmethod
     @strawberry_django.connection(ListConnectionWithTotalCount[PhotoType], filters=PhotoFiler, order=PhotoOrder)
+    @staticmethod
     def photos(parent: Parent[UserModel]) -> Iterable["PhotoType"]:
         return Photo.objects.filter(user_id=parent.id)
 
