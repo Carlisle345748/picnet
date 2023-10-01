@@ -7,6 +7,7 @@ from django.contrib.auth.models import AbstractUser
 from strawberry import auto
 from strawberry import relay
 from strawberry.types import Info
+from strawberry import Parent
 from strawberry_django.relay import ListConnectionWithTotalCount
 
 from . import models
@@ -38,13 +39,15 @@ class ProfileType(relay.Node):
     follower: ListConnectionWithTotalCount["UserType"] = strawberry_django.connection()
     following: ListConnectionWithTotalCount["UserType"] = strawberry_django.connection()
 
+    @staticmethod
     @strawberry_django.field(name="avatar", only=["avatar"])
-    def avatar_url(self) -> str:
-        return self.avatar_url
+    def avatar_url(parent: Parent[models.Profile]) -> str:
+        return parent.avatar_url
 
+    @staticmethod
     @strawberry_django.field(prefetch_related=["follower"])
-    def is_following(self, info: Info) -> bool:
-        return self.follower.filter(pk=info.context.request.user.id).exists()
+    def is_following(parent: Parent[models.Profile], info: Info) -> bool:
+        return parent.follower.filter(pk=info.context.request.user.id).exists()
 
 
 @strawberry_django.type(models.PhotoTag)
@@ -64,17 +67,20 @@ class PhotoType(relay.Node):
     location: auto
     comments: "ListConnectionWithTotalCount[CommentType]" = strawberry_django.connection(name="comments")
 
+    @staticmethod
     @strawberry_django.field(only=["file"])
-    def url(self) -> str:
-        return self.file.url
+    def url(parent: Parent[models.Photo]) -> str:
+        return parent.file.url
 
+    @staticmethod
     @strawberry_django.field(prefetch_related=["user_like"])
-    def is_like(self, info: Info) -> bool:
-        return self.user_like.filter(pk=info.context.request.user.id).exists()
+    def is_like(parent: Parent[models.Photo], info: Info) -> bool:
+        return parent.user_like.filter(pk=info.context.request.user.id).exists()
 
+    @staticmethod
     @strawberry_django.field(only=["file", "ratio"])
-    def ratio(self) -> float:
-        return self.ratio if self.ratio != -1 else self.file.height / self.file.width
+    def ratio(parent: Parent[models.Photo]) -> float:
+        return parent.ratio if parent.ratio != -1 else parent.file.height / parent.file.width
 
 
 @strawberry_django.type(UserModel, filters=UserFilter, select_related="profile")
@@ -85,9 +91,10 @@ class UserType(relay.Node):
     email: auto
     profile: "ProfileType"
 
+    @staticmethod
     @strawberry_django.connection(ListConnectionWithTotalCount[PhotoType], filters=PhotoFiler, order=PhotoOrder)
-    def photos(self) -> Iterable["PhotoType"]:
-        return Photo.objects.filter(user_id=self.id)
+    def photos(parent: Parent[UserModel]) -> Iterable["PhotoType"]:
+        return Photo.objects.filter(user_id=parent.id)
 
 
 @strawberry_django.type(models.Comment)

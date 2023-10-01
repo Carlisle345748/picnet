@@ -15,7 +15,7 @@ from backend.directive import IsAuthenticated
 @strawberry.type
 class CostumeQuery:
 
-    @strawberry.field()
+    @strawberry.field
     def background_image(self) -> str:
         return default_storage.url('background.png')
 
